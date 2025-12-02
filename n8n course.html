@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ZN Studio — n8n 實作課 報名表</title>
+  <meta name="description" content="ZN Studio：從零開始，用 n8n 打造屬於你的第一條自動化流程 — 報名表" />
+  <style>
+    /* --------- Reset & 基本 --------- */
+    :root{
+      --accent:#0ea5a4;
+      --dark:#0f1724;
+      --muted:#6b7280;
+      --card:#0b1220;
+      --bg:#071026;
+      --glass: rgba(255,255,255,0.04);
+      font-family: "Noto Sans TC", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      background: linear-gradient(180deg,#041227 0%, #071026 60%);
+      color:#e6eef6;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      padding:32px;
+      min-height:100vh;
+    }
+    .container{
+      max-width:980px;
+      margin:0 auto;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:12px;
+      padding:28px;
+      box-shadow: 0 8px 30px rgba(2,6,23,0.6);
+      border:1px solid rgba(255,255,255,0.03);
+    }
+    header{display:flex;gap:16px;align-items:center;margin-bottom:20px}
+    .hero-img{
+      width:120px;height:80px;border-radius:8px;overflow:hidden;flex-shrink:0;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+      background:linear-gradient(135deg,#083047,#0a2130);
+      display:flex;align-items:center;justify-content:center;
+    }
+    .hero-img img{width:100%;height:100%;object-fit:cover}
+    h1{font-size:20px;margin:0 0 4px 0}
+    p.lead{margin:0;color:var(--muted);font-size:14px}
+
+    /* --------- 卡片樣式 --------- */
+    .card{background:var(--card);padding:18px;border-radius:10px;margin-bottom:18px;border:1px solid rgba(255,255,255,0.03)}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    label{display:block;font-size:13px;color:#cfe8ec;margin-bottom:6px}
+    input[type="text"], input[type="email"], input[type="tel"], select, textarea {
+      width:100%;
+      padding:10px 12px;
+      border-radius:8px;border:1px solid rgba(255,255,255,0.04);
+      background:transparent;color: #e6eef6;
+      outline:none;font-size:14px;
+    }
+    textarea{min-height:96px;resize:vertical;padding-top:10px}
+    .small{font-size:13px;color:var(--muted);margin-top:6px}
+    .radio-row{display:flex;gap:12px;align-items:center}
+    .radio{
+      display:flex;gap:8px;align-items:center;padding:8px 10px;border-radius:8px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));border:1px solid rgba(255,255,255,0.02)
+    }
+    .muted{color:var(--muted);font-size:13px}
+
+    /* --------- CTA --------- */
+    .actions{display:flex;gap:12px;align-items:center;justify-content:flex-end;margin-top:12px}
+    button.primary{background:linear-gradient(90deg,var(--accent),#06b6d4);color:#052024;padding:12px 18px;border-radius:10px;border:none;font-weight:600;cursor:pointer;box-shadow:0 6px 18px rgba(13,148,136,0.18)}
+    button.ghost{background:transparent;color:var(--muted);padding:10px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);cursor:pointer}
+
+    /* --------- 訊息 --------- */
+    .note{background:rgba(14,165,164,0.06);padding:10px;border-radius:8px;color:#9fe6e2;font-size:13px;border:1px solid rgba(14,165,164,0.06)}
+
+    /* --------- 小尺寸響應 --------- */
+    @media (max-width:800px){
+      .grid{grid-template-columns:1fr}
+      header{flex-direction:row;gap:12px}
+      .hero-img{width:96px;height:64px}
+      .actions{flex-direction:column;align-items:stretch}
+    }
+  </style>
+</head>
+<body>
+  <div class="container" role="main">
+    <header>
+      <div class="hero-img" aria-hidden="true">
+        <img src="https://via.placeholder.com/120x80/083047/0ea5a4?text=n8n" alt="n8n workflow" id="coverImg" />
+      </div>
+      <div>
+        <h1>🚀 ZN Studio — 從零開始的 n8n 實作課（12/20）</h1>
+        <p class="lead">小班 15 人 • 台北中正 • 13:00–17:00 • 教你完成第一條自動化流程</p>
+      </div>
+    </header>
+
+    <form id="signupForm" class="card" autocomplete="on">
+      <!-- 1. 基本資料 -->
+      <section class="card" aria-labelledby="sec-basic">
+        <h2 id="sec-basic" style="margin:0 0 8px 0;font-size:15px">一、基本資料</h2>
+        <div class="grid">
+          <div>
+            <label for="name">姓名（必填）</label>
+            <input id="name" name="name" type="text" placeholder="請填寫真實姓名" required />
+          </div>
+          <div>
+            <label for="phone">聯絡電話（必填）</label>
+            <input id="phone" name="phone" type="tel" placeholder="09xx-xxx-xxx" required />
+          </div>
+          <div>
+            <label for="email">Email（必填）</label>
+            <input id="email" name="email" type="email" placeholder="name@example.com" required />
+          </div>
+          <div>
+            <label for="line">LINE ID（選填）</label>
+            <input id="line" name="line" type="text" placeholder="LINE ID" />
+          </div>
+          <div>
+            <label for="company">公司／單位（選填）</label>
+            <input id="company" name="company" type="text" placeholder="公司或單位" />
+          </div>
+          <div>
+            <label for="title">職稱（選填）</label>
+            <input id="title" name="title" type="text" placeholder="職稱" />
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. 報名資訊 -->
+      <section class="card" aria-labelledby="sec-info">
+        <h2 id="sec-info" style="margin:0 0 8px 0;font-size:15px">二、報名資訊</h2>
+
+        <label for="course">欲報名課程 / 報名場次（必選）</label>
+        <select id="course" name="course" required>
+          <option value="">-- 選擇課程 --</option>
+          <option value="n8n-intro-20251220">ZN Studio｜n8n 實作入門（2025/12/20）</option>
+        </select>
+
+        <div style="margin-top:12px">
+          <label for="qty">報名人數</label>
+          <select id="qty" name="qty" required>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="other">其他（請註明）</option>
+          </select>
+          <div id="otherQtyWrap" style="display:none;margin-top:8px">
+            <input id="otherQty" name="otherQty" type="text" placeholder="請輸入人數" />
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. 付款方式 -->
+      <section class="card" aria-labelledby="sec-pay">
+        <h2 id="sec-pay" style="margin:0 0 8px 0;font-size:15px">三、付款方式（必選）</h2>
+
+        <div class="radio-row" role="radiogroup" aria-label="付款方式">
+          <label class="radio">
+            <input type="radio" name="payMethod" value="ecpay" checked /> <span class="muted">綠界金流（信用卡 / ATM / 超商）</span>
+          </label>
+          <label class="radio">
+            <input type="radio" name="payMethod" value="bank" /> <span class="muted">銀行匯款</span>
+          </label>
+        </div>
+
+        <!-- 綠界付款說明 -->
+        <div id="ecpayBox" style="margin-top:12px">
+          <p class="small">選擇綠界金流後，表單送出會導向綠界結帳頁完成付款。</p>
+
+          <div style="margin-top:8px" class="grid">
+            <div>
+              <label for="ecpayMethod">付款方式（綠界）</label>
+              <select id="ecpayMethod" name="ecpayMethod">
+                <option value="credit">信用卡</option>
+                <option value="atm">ATM 轉帳</option>
+                <option value="convenience">超商代碼</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- 匯款付款說明 -->
+        <div id="bankBox" style="display:none;margin-top:12px">
+          <p class="small">請依下列帳戶資訊匯款，匯款完成請填寫帳號末五碼與匯款時間。</p>
+
+          <div class="note" id="bankInfo">
+            <strong>銀行名稱：</strong> 台灣銀行<br/>
+            <strong>戶名：</strong> ZN Studio<br/>
+            <strong>銀行帳號：</strong> 01234567890123
+          </div>
+
+          <div style="margin-top:10px" class="grid">
+            <div>
+              <label for="bankLast5">匯款帳號末 5 碼</label>
+              <input id="bankLast5" name="bankLast5" type="text" placeholder="例如：12345" />
+            </div>
+            <div>
+              <label for="bankTime">匯款時間</label>
+              <input id="bankTime" name="bankTime" type="text" placeholder="YYYY-MM-DD HH:MM" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. 發票資訊 -->
+      <section class="card" aria-labelledby="sec-invoice">
+        <h2 id="sec-invoice" style="margin:0 0 8px 0;font-size:15px">四、發票資訊</h2>
+
+        <div style="display:flex;gap:12px;align-items:center">
+          <label><input type="radio" name="invType" value="two" checked /> 二聯式（個人）</label>
+          <label><input type="radio" name="invType" value="three" /> 三聯式（公司）</label>
+        </div>
+
+        <div id="threeInvoice" style="display:none;margin-top:10px">
+          <label for="vatTitle">公司抬頭</label>
+          <input id="vatTitle" name="vatTitle" type="text" placeholder="公司抬頭" />
+          <label for="vatNo" style="margin-top:8px">統一編號</label>
+          <input id="vatNo" name="vatNo" type="text" placeholder="統編" />
+        </div>
+
+        <div style="margin-top:8px">
+          <label for="invEmail">發票接收 Email（若為電子發票）</label>
+          <input id="invEmail" name="invEmail" type="email" placeholder="receipt@example.com" />
+        </div>
+      </section>
+
+      <!-- 5. 備註 -->
+      <section class="card" aria-labelledby="sec-remark">
+        <h2 id="sec-remark" style="margin:0 0 8px 0;font-size:15px">五、其他備註</h2>
+        <textarea id="remark" name="remark" placeholder="特殊需求、飲食禁忌、同場報名等請註明（選填）"></textarea>
+      </section>
+
+      <!-- 6. 提交 -->
+      <div class="actions">
+        <button type="button" class="ghost" onclick="resetForm()">重設表單</button>
+        <button type="submit" class="primary" id="submitBtn">提交報名</button>
+      </div>
+
+      <div style="margin-top:12px" class="small">提交後請留意 Email 或 Line，我們將於 1–2 個工作天內確認報名狀態。</div>
+    </form>
+
+    <footer style="margin-top:18px;text-align:center;color:var(--muted);font-size:13px">
+      ZN Studio &nbsp;•&nbsp; 小班實作課（名額有限）&nbsp;•&nbsp; 如需發票或收據請於報名時告知
+    </footer>
+  </div>
+
+  <script>
+    // ===== n8n Webhook URL =====
+    const N8N_WEBHOOK_URL = "https://nickleo9.zeabur.app/webhook/course-registration";
+
+    const form = document.getElementById('signupForm');
+    const payRadios = document.getElementsByName('payMethod');
+    const bankBox = document.getElementById('bankBox');
+    const ecpayBox = document.getElementById('ecpayBox');
+    const qtySelect = document.getElementById('qty');
+    const otherQtyWrap = document.getElementById('otherQtyWrap');
+    const submitBtn = document.getElementById('submitBtn');
+    const invTypeRadios = document.getElementsByName('invType');
+    const threeInvoice = document.getElementById('threeInvoice');
+
+    // ===== 付款方式切換 =====
+    function updatePayUI() {
+      const v = Array.from(payRadios).find(r=>r.checked).value;
+      if (v === 'bank') {
+        bankBox.style.display = 'block';
+        ecpayBox.style.display = 'none';
+      } else {
+        bankBox.style.display = 'none';
+        ecpayBox.style.display = 'block';
+      }
+    }
+    Array.from(payRadios).forEach(r => r.addEventListener('change', updatePayUI));
+    updatePayUI();
+
+    // ===== 人數選擇 =====
+    qtySelect.addEventListener('change', () => {
+      if (qtySelect.value === 'other') {
+        otherQtyWrap.style.display = 'block';
+      } else {
+        otherQtyWrap.style.display = 'none';
+        document.getElementById('otherQty').value = '';
+      }
+    });
+
+    // ===== 發票類型切換 =====
+    Array.from(invTypeRadios).forEach(r => {
+      r.addEventListener('change', () => {
+        if (r.value === 'three') {
+          threeInvoice.style.display = 'block';
+        } else {
+          threeInvoice.style.display = 'none';
+        }
+      });
+    });
+
+    // ===== 重設表單 =====
+    function resetForm(){
+      if (!confirm('確定要重設表單嗎？')) return;
+      form.reset();
+      updatePayUI();
+      otherQtyWrap.style.display = 'none';
+      threeInvoice.style.display = 'none';
+    }
+
+    // ===== 表單送出處理（改用 JSON 格式）=====
+    form.addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      
+      submitBtn.disabled = true;
+      submitBtn.textContent = '正在處理...';
+
+      // === 驗證必填欄位 ===
+      const name = document.getElementById('name').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const course = document.getElementById('course').value;
+
+      if (!name || !phone || !email || !course) {
+        alert('請填寫姓名、電話、Email 與欲報名課程。');
+        submitBtn.disabled = false;
+        submitBtn.textContent = '提交報名';
+        return;
+      }
+
+      // === 收集表單資料（JSON 格式）===
+      const formData = {
+        // 基本資料
+        name: name,
+        email: email,
+        phone: phone,
+        line: document.getElementById('line').value.trim() || '',
+        company: document.getElementById('company').value.trim() || '',
+        title: document.getElementById('title').value.trim() || '',
+        
+        // 報名資訊
+        course: course,
+        qty: document.getElementById('qty').value,
+        otherQty: document.getElementById('otherQty').value || '',
+        
+        // 付款方式
+        payMethod: document.querySelector('input[name="payMethod"]:checked').value,
+        
+        // 綠界金流
+        ecpayMethod: document.getElementById('ecpayMethod').value || '',
+        
+        // 銀行匯款
+        bankLast5: document.getElementById('bankLast5').value || '',
+        bankTime: document.getElementById('bankTime').value || '',
+        
+        // 發票資訊
+        invType: document.querySelector('input[name="invType"]:checked').value,
+        vatTitle: document.getElementById('vatTitle').value || '',
+        vatNo: document.getElementById('vatNo').value || '',
+        invEmail: document.getElementById('invEmail').value || '',
+        
+        // 備註
+        remark: document.getElementById('remark').value.trim() || ''
+      };
+
+      console.log('準備送出的資料:', formData);
+
+      // === 送到 n8n Webhook ===
+      try {
+        const response = await fetch(N8N_WEBHOOK_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(formData)
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        console.log('n8n 回應:', result);
+
+        // === 處理回應 ===
+        if (result.success) {
+          // 如果是綠界付款，導向付款頁
+          if (formData.payMethod === 'ecpay' && result.paymentUrl) {
+            alert(`✅ 報名成功！\n訂單編號：${result.orderId}\n\n即將導向綠界付款頁面...`);
+            // 跳轉到付款成功頁面（帶上訂單編號和姓名）
+            window.location.href = `https://nickleo051216.github.io/n8ncourse/course-success.html?order=${result.orderId}&name=${encodeURIComponent(name)}`;
+          } else {
+            // 匯款的話，顯示提示
+            alert(`✅ 報名成功！\n訂單編號：${result.orderId}\n\n請依頁面上的匯款資訊完成匯款。\n我們確認後會與您聯絡。`);
+            // 可以導向匯款說明頁或成功頁
+            window.location.href = `https://nickleo051216.github.io/n8ncourse/course-success.html?order=${result.orderId}&name=${encodeURIComponent(name)}`;
+          }
+        } else {
+          alert('❌ 報名失敗：' + (result.error || '未知錯誤'));
+        }
+
+      } catch (error) {
+        console.error('報名錯誤:', error);
+        alert('❌ 送出失敗，請稍後再試或聯絡主辦方。\n\n錯誤訊息：' + error.message + '\n\n聯絡方式：\nEmail: nickleo051216@gmail.com\nLine: https://lin.ee/Faz0doj');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = '提交報名';
+      }
+    });
+  </script>
+</body>
+</html>
