@@ -1,0 +1,543 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>報名成功 - ZN Studio n8n 實作課</title>
+  <meta name="description" content="感謝您報名 ZN Studio 的 n8n 實作課程" />
+  <style>
+    /* --------- Reset & 基本 --------- */
+    :root{
+      --accent:#0ea5a4;
+      --dark:#0f1724;
+      --muted:#6b7280;
+      --card:#0b1220;
+      --bg:#071026;
+      --glass: rgba(255,255,255,0.04);
+      font-family: "Noto Sans TC", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      background: linear-gradient(180deg,#041227 0%, #071026 60%);
+      color:#e6eef6;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      padding:32px;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .container{
+      max-width:680px;
+      width:100%;
+      margin:0 auto;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:16px;
+      padding:40px;
+      box-shadow: 0 8px 30px rgba(2,6,23,0.6);
+      border:1px solid rgba(255,255,255,0.03);
+    }
+
+    /* --------- 成功圖示 --------- */
+    .success-icon{
+      width:80px;
+      height:80px;
+      margin:0 auto 24px;
+      background:linear-gradient(135deg, #0ea5a4, #06b6d4);
+      border-radius:50%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:48px;
+      box-shadow: 0 6px 24px rgba(14,165,164,0.4);
+      animation: scaleIn 0.5s ease-out;
+    }
+    @keyframes scaleIn {
+      0% { transform: scale(0); opacity: 0; }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    h1{
+      font-size:28px;
+      margin:0 0 12px 0;
+      text-align:center;
+      background: linear-gradient(90deg, #0ea5a4, #06b6d4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    p.lead{
+      margin:0 0 32px 0;
+      color:var(--muted);
+      font-size:15px;
+      text-align:center;
+      line-height:1.6;
+    }
+
+    /* --------- 課程資訊卡片 --------- */
+    .course-info{
+      background:var(--card);
+      padding:24px;
+      border-radius:12px;
+      margin-bottom:24px;
+      border:1px solid rgba(255,255,255,0.03);
+    }
+    .course-title{
+      font-size:18px;
+      font-weight:600;
+      margin:0 0 16px 0;
+      color:#cfe8ec;
+    }
+    .info-row{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      margin-bottom:12px;
+      font-size:14px;
+    }
+    .info-row:last-child{margin-bottom:0}
+    .info-icon{
+      font-size:20px;
+      width:32px;
+      text-align:center;
+      flex-shrink:0;
+    }
+    .info-label{
+      color:var(--muted);
+      min-width:60px;
+    }
+    .info-value{
+      color:#e6eef6;
+      flex:1;
+    }
+
+    /* --------- 行動按鈕區 --------- */
+    .actions{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      margin-bottom:24px;
+    }
+    .btn{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      padding:14px 20px;
+      border-radius:10px;
+      border:none;
+      font-weight:600;
+      cursor:pointer;
+      text-decoration:none;
+      font-size:15px;
+      transition: all 0.2s;
+    }
+    .btn-primary{
+      background:linear-gradient(90deg,var(--accent),#06b6d4);
+      color:#052024;
+      box-shadow:0 6px 18px rgba(13,148,136,0.18);
+    }
+    .btn-primary:hover{
+      transform: translateY(-2px);
+      box-shadow:0 8px 24px rgba(13,148,136,0.28);
+    }
+    .btn-secondary{
+      background:rgba(255,255,255,0.04);
+      color:#cfe8ec;
+      border:1px solid rgba(255,255,255,0.08);
+    }
+    .btn-secondary:hover{
+      background:rgba(255,255,255,0.08);
+    }
+
+    /* --------- 下拉選單（加入行事曆）--------- */
+    .calendar-dropdown{
+      position:relative;
+    }
+    .calendar-menu{
+      position:absolute;
+      top:100%;
+      left:0;
+      right:0;
+      margin-top:8px;
+      background:var(--card);
+      border:1px solid rgba(255,255,255,0.08);
+      border-radius:10px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      display:none;
+      z-index:10;
+      overflow:hidden;
+    }
+    .calendar-menu.show{display:block}
+    .calendar-item{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:12px 16px;
+      color:#e6eef6;
+      text-decoration:none;
+      font-size:14px;
+      border-bottom:1px solid rgba(255,255,255,0.04);
+      transition: background 0.2s;
+    }
+    .calendar-item:last-child{border-bottom:none}
+    .calendar-item:hover{
+      background:rgba(255,255,255,0.06);
+    }
+    .calendar-item-icon{
+      font-size:18px;
+      width:24px;
+      text-align:center;
+    }
+
+    /* --------- 通知訊息 --------- */
+    .notice{
+      background:rgba(14,165,164,0.06);
+      padding:16px;
+      border-radius:10px;
+      color:#9fe6e2;
+      font-size:14px;
+      border:1px solid rgba(14,165,164,0.12);
+      margin-bottom:24px;
+      line-height:1.6;
+    }
+    .notice strong{color:#0ea5a4}
+
+    /* --------- 步驟說明 --------- */
+    .steps{
+      background:var(--card);
+      padding:20px;
+      border-radius:12px;
+      margin-bottom:24px;
+      border:1px solid rgba(255,255,255,0.03);
+    }
+    .step-title{
+      font-size:15px;
+      font-weight:600;
+      margin:0 0 12px 0;
+      color:#cfe8ec;
+    }
+    .step-item{
+      display:flex;
+      gap:12px;
+      margin-bottom:12px;
+      font-size:14px;
+      line-height:1.6;
+    }
+    .step-item:last-child{margin-bottom:0}
+    .step-num{
+      background:linear-gradient(135deg, #0ea5a4, #06b6d4);
+      color:#052024;
+      width:24px;
+      height:24px;
+      border-radius:50%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:600;
+      font-size:12px;
+      flex-shrink:0;
+    }
+    .step-text{
+      color:#e6eef6;
+      flex:1;
+    }
+
+    /* --------- 聯絡資訊 --------- */
+    .contact{
+      text-align:center;
+      padding-top:24px;
+      border-top:1px solid rgba(255,255,255,0.04);
+    }
+    .contact-title{
+      font-size:14px;
+      color:var(--muted);
+      margin:0 0 12px 0;
+    }
+    .contact-links{
+      display:flex;
+      justify-content:center;
+      gap:16px;
+      flex-wrap:wrap;
+    }
+    .contact-link{
+      color:#0ea5a4;
+      text-decoration:none;
+      font-size:14px;
+      display:flex;
+      align-items:center;
+      gap:6px;
+    }
+    .contact-link:hover{
+      text-decoration:underline;
+    }
+
+    /* --------- 響應式 --------- */
+    @media (max-width:640px){
+      body{padding:16px}
+      .container{padding:24px}
+      h1{font-size:24px}
+      .success-icon{width:64px;height:64px;font-size:36px}
+      .course-info{padding:16px}
+      .info-row{flex-direction:column;align-items:flex-start;gap:4px}
+      .info-label{min-width:auto}
+    }
+  </style>
+</head>
+<body>
+  <div class="container" role="main">
+    <!-- 成功圖示 -->
+    <div class="success-icon" role="img" aria-label="成功">
+      ✓
+    </div>
+
+    <h1>🎉 報名成功！</h1>
+    <p class="lead" id="welcomeMessage">
+      感謝您報名 ZN Studio 的 n8n 實作課程<br/>
+      我們已收到您的付款，期待在課堂上見到您！
+    </p>
+    
+    <!-- 訂單編號（如果有的話）-->
+    <div id="orderInfo" style="display:none;text-align:center;margin-bottom:24px">
+      <div style="background:rgba(14,165,164,0.08);padding:12px 20px;border-radius:8px;display:inline-block;border:1px solid rgba(14,165,164,0.15)">
+        <span style="color:var(--muted);font-size:13px;margin-right:8px">訂單編號</span>
+        <span id="orderNumber" style="color:#0ea5a4;font-weight:600;font-size:15px;letter-spacing:0.5px"></span>
+      </div>
+    </div>
+
+    <!-- 通知訊息 -->
+    <div class="notice" role="alert">
+      <strong>📧 Email 確認信</strong> 和 <strong>📱 Line OA 通知</strong> 將在 1-2 個工作天內寄出，請留意信箱（包含垃圾郵件匣）與 Line 訊息。
+    </div>
+
+    <!-- 課程資訊 -->
+    <div class="course-info">
+      <h2 class="course-title">📚 課程資訊</h2>
+      <div class="info-row">
+        <span class="info-icon">🎯</span>
+        <span class="info-label">課程名稱</span>
+        <span class="info-value">從零開始，用 n8n 打造屬於你的第一條自動化流程</span>
+      </div>
+      <div class="info-row">
+        <span class="info-icon">📅</span>
+        <span class="info-label">上課日期</span>
+        <span class="info-value">2025 年 12 月 20 日（星期六）</span>
+      </div>
+      <div class="info-row">
+        <span class="info-icon">⏰</span>
+        <span class="info-label">上課時間</span>
+        <span class="info-value">13:00 - 17:00（4 小時）</span>
+      </div>
+      <div class="info-row">
+        <span class="info-icon">📍</span>
+        <span class="info-label">上課地點</span>
+        <span class="info-value">台北市中正區許昌街 42 之 1 號 4 樓 D 教室</span>
+      </div>
+      <div class="info-row">
+        <span class="info-icon">👥</span>
+        <span class="info-label">班級人數</span>
+        <span class="info-value">小班制 15 人</span>
+      </div>
+    </div>
+
+    <!-- 行動按鈕 -->
+    <div class="actions">
+      <!-- 加入行事曆（下拉選單）-->
+      <div class="calendar-dropdown">
+        <button class="btn btn-primary" id="calendarBtn" onclick="toggleCalendar()">
+          📅 加入行事曆
+        </button>
+        <div class="calendar-menu" id="calendarMenu">
+          <a href="#" class="calendar-item" onclick="addToGoogleCalendar(event)">
+            <span class="calendar-item-icon">📗</span>
+            <span>Google 日曆</span>
+          </a>
+          <a href="#" class="calendar-item" onclick="downloadICS(event)">
+            <span class="calendar-item-icon">📘</span>
+            <span>Apple 日曆 / Outlook（下載 .ics）</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- 加入 Line 社群 -->
+      <a href="https://reurl.cc/1OZNAY" target="_blank" class="btn btn-secondary">
+        💬 加入 Line 社群（課前交流）
+      </a>
+    </div>
+
+    <!-- 接下來的步驟 -->
+    <div class="steps">
+      <h3 class="step-title">📋 接下來的步驟</h3>
+      <div class="step-item">
+        <span class="step-num">1</span>
+        <span class="step-text">
+          <strong>收到確認信</strong>：我們會在 1-2 個工作天內寄送課程確認信至您的 Email，內含詳細地址、交通方式、課前準備事項。
+        </span>
+      </div>
+      <div class="step-item">
+        <span class="step-num">2</span>
+        <span class="step-text">
+          <strong>加入 Line 社群</strong>：建議加入 Line 社群與其他學員交流，也會在社群中發布課程相關通知。
+        </span>
+      </div>
+      <div class="step-item">
+        <span class="step-num">3</span>
+        <span class="step-text">
+          <strong>課前準備</strong>：我們會在課前 3-5 天寄送「課前準備指南」，包含 n8n 帳號註冊、環境設定等事項。
+        </span>
+      </div>
+      <div class="step-item">
+        <span class="step-num">4</span>
+        <span class="step-text">
+          <strong>準時上課</strong>：12/20（六）13:00 在台北中正區教室見！記得帶筆電喔 💻
+        </span>
+      </div>
+    </div>
+
+    <!-- 聯絡資訊 -->
+    <div class="contact">
+      <p class="contact-title">有任何問題嗎？歡迎聯絡我們：</p>
+      <div class="contact-links">
+        <a href="/cdn-cgi/l/email-protection#0c62656f676069633c393d3e3d3a4c6b616d6560226f6361" class="contact-link">
+          <span>📧</span>
+          <span>Email</span>
+        </a>
+        <a href="https://lin.ee/Faz0doj" target="_blank" class="contact-link">
+          <span>💬</span>
+          <span>Line OA</span>
+        </a>
+        <a href="tel:0932684051" class="contact-link">
+          <span>📞</span>
+          <span>0932-684-051</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+    // ========== 讀取 URL 參數並個人化顯示 ==========
+    
+    // 取得 URL 參數的函數
+    function getUrlParameter(name) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(name);
+    }
+    
+    // 頁面載入時處理個人化資訊
+    window.addEventListener('DOMContentLoaded', function() {
+      // 讀取訂單編號
+      const orderNumber = getUrlParameter('order');
+      if (orderNumber) {
+        document.getElementById('orderNumber').textContent = orderNumber;
+        document.getElementById('orderInfo').style.display = 'block';
+      }
+      
+      // 讀取學員姓名
+      const studentName = getUrlParameter('name');
+      if (studentName) {
+        const welcomeMessage = document.getElementById('welcomeMessage');
+        welcomeMessage.innerHTML = `
+          感謝 <strong style="color:#0ea5a4">${studentName}</strong> 的報名！<br/>
+          我們已收到您報名 ZN Studio 的 n8n 實作課程<br/>
+          期待在課堂上見到您！
+        `;
+      }
+    });
+    
+    // ========== 行事曆功能 ==========
+    
+    // 課程資訊（請根據實際情況修改）
+    const EVENT_DATA = {
+      title: 'ZN Studio - n8n 實作入門課程',
+      description: '從零開始，用 n8n 打造屬於你的第一條自動化流程\\n\\n講師：Nick Chang\\n小班制 15 人\\n\\n請記得攜帶筆電！',
+      location: '台北市中正區許昌街 42 之 1 號 4 樓 D 教室',
+      startDate: '2025-12-20T13:00:00',
+      endDate: '2025-12-20T17:00:00',
+      timezone: 'Asia/Taipei'
+    };
+
+    // 切換行事曆選單
+    function toggleCalendar() {
+      const menu = document.getElementById('calendarMenu');
+      menu.classList.toggle('show');
+    }
+
+    // 點擊其他地方關閉選單
+    document.addEventListener('click', function(e) {
+      const calendarBtn = document.getElementById('calendarBtn');
+      const calendarMenu = document.getElementById('calendarMenu');
+      if (!calendarBtn.contains(e.target) && !calendarMenu.contains(e.target)) {
+        calendarMenu.classList.remove('show');
+      }
+    });
+
+    // 加入 Google 日曆
+    function addToGoogleCalendar(e) {
+      e.preventDefault();
+      
+      const start = EVENT_DATA.startDate.replace(/[-:]/g, '').split('.')[0] + 'Z';
+      const end = EVENT_DATA.endDate.replace(/[-:]/g, '').split('.')[0] + 'Z';
+      
+      const url = `https://calendar.google.com/calendar/render?action=TEMPLATE` +
+        `&text=${encodeURIComponent(EVENT_DATA.title)}` +
+        `&dates=${start}/${end}` +
+        `&details=${encodeURIComponent(EVENT_DATA.description)}` +
+        `&location=${encodeURIComponent(EVENT_DATA.location)}` +
+        `&ctz=${EVENT_DATA.timezone}`;
+      
+      window.open(url, '_blank');
+      document.getElementById('calendarMenu').classList.remove('show');
+    }
+
+    // 下載 .ics 檔案（Apple Calendar / Outlook）
+    function downloadICS(e) {
+      e.preventDefault();
+      
+      // 轉換為 ICS 格式的日期時間
+      function formatICSDate(dateStr) {
+        return dateStr.replace(/[-:]/g, '').split('.')[0] + 'Z';
+      }
+      
+      const icsContent = [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//ZN Studio//n8n Course//EN',
+        'CALSCALE:GREGORIAN',
+        'METHOD:PUBLISH',
+        'X-WR-TIMEZONE:Asia/Taipei',
+        'BEGIN:VEVENT',
+        `DTSTART:${formatICSDate(EVENT_DATA.startDate)}`,
+        `DTEND:${formatICSDate(EVENT_DATA.endDate)}`,
+        `DTSTAMP:${formatICSDate(new Date().toISOString())}`,
+        `SUMMARY:${EVENT_DATA.title}`,
+        `DESCRIPTION:${EVENT_DATA.description.replace(/\n/g, '\\n')}`,
+        `LOCATION:${EVENT_DATA.location}`,
+        'STATUS:CONFIRMED',
+        'SEQUENCE:0',
+        `UID:${Date.now()}@znstudio.com`,
+        'BEGIN:VALARM',
+        'TRIGGER:-PT24H',
+        'ACTION:DISPLAY',
+        'DESCRIPTION:ZN Studio n8n 課程提醒：明天 13:00 上課！',
+        'END:VALARM',
+        'END:VEVENT',
+        'END:VCALENDAR'
+      ].join('\r\n');
+      
+      // 建立下載連結
+      const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'ZN-Studio-n8n-Course-20251220.ics';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      document.getElementById('calendarMenu').classList.remove('show');
+    }
+
+    // 頁面載入時顯示動畫
+    window.addEv
