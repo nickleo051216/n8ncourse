@@ -285,6 +285,12 @@
       .info-row{flex-direction:column;align-items:flex-start;gap:4px}
       .info-label{min-width:auto}
     }
+
+    /* --------- 動畫 --------- */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
   </style>
 </head>
 <body>
@@ -334,7 +340,7 @@
       <div class="info-row">
         <span class="info-icon">📍</span>
         <span class="info-label">上課地點</span>
-        <span class="info-value">台北市中正區（詳細地址將於確認信中提供）</span>
+        <span class="info-value">台北市中正區許昌街 42 之 1 號 4 樓 D 教室</span>
       </div>
       <div class="info-row">
         <span class="info-icon">👥</span>
@@ -453,7 +459,7 @@
     const EVENT_DATA = {
       title: 'ZN Studio - n8n 實作入門課程',
       description: '從零開始，用 n8n 打造屬於你的第一條自動化流程\\n\\n講師：Nick Chang\\n小班制 15 人\\n\\n請記得攜帶筆電！',
-      location: '台北市中正區（詳細地址請見確認信）',
+      location: '台北市中正區許昌街 42 之 1 號 4 樓 D 教室',
       startDate: '2025-12-20T13:00:00',
       endDate: '2025-12-20T17:00:00',
       timezone: 'Asia/Taipei'
@@ -540,4 +546,9 @@
     }
 
     // 頁面載入時顯示動畫
-    window.addEv
+    window.addEventListener('load', function() {
+      document.querySelector('.container').style.animation = 'fadeIn 0.5s ease-out';
+    });
+  </script>
+</body>
+</html>
