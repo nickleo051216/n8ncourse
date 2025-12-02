@@ -57,6 +57,24 @@
       background:transparent;color: #e6eef6;
       outline:none;font-size:14px;
     }
+    /* 修正下拉選單選項顏色 */
+    select {
+      background-color: #0b1220;
+      color: #e6eef6;
+    }
+    select option {
+      background-color: #0b1220;
+      color: #e6eef6;
+      padding: 8px;
+    }
+    select option:hover {
+      background-color: #0ea5a4;
+      color: #ffffff;
+    }
+    select:focus {
+      border-color: #0ea5a4;
+      box-shadow: 0 0 0 2px rgba(14, 165, 164, 0.1);
+    }
     textarea{min-height:96px;resize:vertical;padding-top:10px}
     .small{font-size:13px;color:var(--muted);margin-top:6px}
     .radio-row{display:flex;gap:12px;align-items:center}
