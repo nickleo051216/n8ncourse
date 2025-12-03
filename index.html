@@ -6,6 +6,7 @@
   <title>ZN Studio — n8n 實作課 報名表</title>
   <meta name="description" content="ZN Studio：從零開始，用 n8n 打造屬於你的第一條自動化流程 — 報名表" />
   <style>
+    /* --------- CSS 樣式保持不變 --------- */
     :root{--accent:#0ea5a4;--dark:#0f1724;--muted:#6b7280;--card:#0b1220;--bg:#071026;font-family: "Noto Sans TC", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;}
     *{box-sizing:border-box}
     body{margin:0;background: linear-gradient(180deg,#041227 0%, #071026 60%);color:#e6eef6;-webkit-font-smoothing:antialiased;padding:32px;min-height:100vh;}
@@ -29,6 +30,8 @@
     .actions{display:flex;gap:12px;align-items:center;justify-content:flex-end;margin-top:12px}
     button.primary{background:linear-gradient(90deg,var(--accent),#06b6d4);color:#052024;padding:12px 18px;border-radius:10px;border:none;font-weight:600;cursor:pointer;box-shadow:0 6px 18px rgba(13,148,136,0.18)}
     button.ghost{background:transparent;color:var(--muted);padding:10px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);cursor:pointer}
+    
+    /* 折疊區塊樣式 */
     .collapsible{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:8px;margin-top:12px;overflow:hidden;}
     .collapsible-header{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;cursor:pointer;user-select:none;transition: background 0.2s;}
     .collapsible-header:hover{background:rgba(255,255,255,0.03);}
@@ -36,8 +39,14 @@
     .collapsible-arrow{font-size:12px;color:var(--muted);transition: transform 0.3s;}
     .collapsible.open .collapsible-arrow{transform: rotate(180deg);}
     .collapsible-content{max-height:0;overflow:hidden;transition: max-height 0.3s ease-out;}
-    .collapsible.open .collapsible-content{max-height:500px;}
+    .collapsible.open .collapsible-content{max-height:800px;} /* 增加高度以容納長內容 */
     .collapsible-inner{padding:0 14px 14px 14px;}
+    
+    /* 課程介紹列表樣式 */
+    .course-list-title {color: #0ea5a4; font-size: 14px; font-weight: 600; margin: 12px 0 6px 0;}
+    .course-list {margin: 0; padding-left: 20px; font-size: 14px; color: #d1d5db; line-height: 1.6;}
+    .course-list li {margin-bottom: 4px;}
+
     .bank-table{width:100%;border-collapse:collapse;margin-top:8px;}
     .bank-table td{padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:14px;}
     .bank-table td:first-child{color:var(--muted);width:80px;}
@@ -48,6 +57,7 @@
     .hint{display:flex;align-items:flex-start;gap:6px;margin-top:8px;padding:10px 12px;background:rgba(14,165,164,0.05);border-radius:6px;border:1px solid rgba(14,165,164,0.1);}
     .hint-icon{flex-shrink:0;font-size:14px;}
     .hint-text{font-size:13px;color:#9fe6e2;line-height:1.5;}
+    
     /* Loading overlay */
     .loading-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(180deg,#041227 0%, #071026 60%);z-index:9999;justify-content:center;align-items:center;}
     .loading-overlay.show{display:flex;}
@@ -59,11 +69,11 @@
     @keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
     .loading-text{font-size:16px;margin:0 0 8px 0;color:#e6eef6;}
     .loading-subtext{font-size:14px;color:#6b7280;margin:0;}
+    
     @media (max-width:800px){.grid{grid-template-columns:1fr}header{flex-direction:row;gap:12px}.hero-img{width:96px;height:64px}.actions{flex-direction:column;align-items:stretch}.radio-row{flex-direction:column;align-items:stretch}}
   </style>
 </head>
 <body>
-  <!-- Loading Overlay -->
   <div class="loading-overlay" id="loadingOverlay">
     <div class="loading-content">
       <div class="loading-logo">
@@ -88,6 +98,60 @@
         <p class="lead">小班 15 人 • 台北市中正區許昌街 42 之 1 號 4 樓 D 教室 • 13:00–17:00</p>
       </div>
     </header>
+
+    <section class="card course-intro" style="border:1px solid rgba(14,165,164,0.3);box-shadow:0 0 15px rgba(14,165,164,0.1);">
+        <div style="text-align:center;margin-bottom:20px;">
+            <h2 style="background:linear-gradient(90deg, #0ea5a4, #06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px;font-size:22px;">n8n 基礎實戰應用 x Line OA 多元 AI 應用</h2>
+            <p style="color:#cfe8ec;font-weight:500;margin:0;">用你意想不到的角度，教你怎麼玩 n8n！</p>
+        </div>
+
+        <div style="margin-bottom:20px;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.1);">
+            <img src="workflow_preview.png" alt="智能行事曆助理工作流" style="width:100%;display:block;">
+        </div>
+
+        <div style="background:rgba(14,165,164,0.1);padding:16px;border-radius:8px;border:1px solid rgba(14,165,164,0.2);margin-bottom:12px;text-align:center;">
+            <p style="margin:0;color:#e6eef6;line-height:1.6;">
+                🎁 <strong>第一堂課成果：</strong><br>
+                帶著 <strong>智能行事曆助理</strong> 回家！<br>
+                <span style="font-size:13px;color:#9fe6e2;">(支援文字 / 圖片辨識 / 語音辨識、MCP 自動查詢與新增行事曆)</span><br>
+                <span style="font-size:12px;color:var(--muted);margin-top:4px;display:block;">* 若時間充裕，加碼實作「智能 AI 機器人」</span>
+            </p>
+        </div>
+
+        <div class="collapsible" id="courseDetailCollapsible">
+            <div class="collapsible-header" onclick="toggleCourseDetails()">
+                <span class="collapsible-title">📖 查看完整課程介紹 (適合對象 / 收穫 / 準備)</span>
+                <span class="collapsible-arrow">▼</span>
+            </div>
+            <div class="collapsible-content">
+                <div class="collapsible-inner" style="padding-top:10px;">
+                    
+                    <div class="course-list-title">🤔 適合怎麼樣的人？</div>
+                    <ul class="course-list">
+                        <li>完全沒聽過 n8n，好奇是什麼</li>
+                        <li>有聽過但不知道怎麼開始，想認識學習 n8n</li>
+                        <li>有自學，不過不確定有沒有學到完整</li>
+                    </ul>
+
+                    <div class="course-list-title">🎯 參加之後可以學到</div>
+                    <ul class="course-list">
+                        <li>至少一條完整的 n8n 工作流（可以直接帶回去玩）</li>
+                        <li>融會貫通，甚至自己回去客製化調整（課堂上教你如何排除問題）</li>
+                        <li>用最意想不到的角度學會 n8n（甚至可以開始介紹給其他人）</li>
+                        <li>加入專屬課堂群組</li>
+                    </ul>
+
+                    <div class="course-list-title">💻 課前準備 (建議)</div>
+                    <ul class="course-list">
+                        <li>希望有 Zeabur 的帳號（如果 n8n 部署完成會更好）</li>
+                        <li>有 OPENAI API (或是 OpenRouter API)</li>
+                        <li>有 Line 官方帳號 (Messaging API)</li>
+                    </ul>
+
+                </div>
+            </div>
+        </div>
+    </section>
 
     <form id="signupForm" class="card" autocomplete="on">
       <section class="card">
@@ -154,7 +218,6 @@
     <footer style="margin-top:18px;text-align:center;color:var(--muted);font-size:13px">ZN Studio • 小班實作課（名額有限）• 如需發票或收據請於報名時告知</footer>
   </div>
 
-  <!-- Hidden form for ECPay submission - 放在 body 最底部 -->
   <form id="ecpayForm" method="POST" action="https://payment.ecpay.com.tw/Cashier/AioCheckOut/V5" style="display:none;"></form>
 
   <script>
@@ -189,6 +252,11 @@
       document.getElementById('bankInfoCollapsible').classList.toggle('open'); 
     }
 
+    // 新增：課程詳情折疊開關
+    function toggleCourseDetails() {
+      document.getElementById('courseDetailCollapsible').classList.toggle('open');
+    }
+
     qtySelect.addEventListener('change', function() {
       otherQtyWrap.style.display = qtySelect.value === 'other' ? 'block' : 'none';
       if (qtySelect.value !== 'other') document.getElementById('otherQty').value = '';
@@ -208,17 +276,13 @@
       otherQtyWrap.style.display = 'none'; 
       threeInvoice.style.display = 'none';
       document.getElementById('bankInfoCollapsible').classList.remove('open');
+      document.getElementById('courseDetailCollapsible').classList.remove('open'); // 重設時也關閉課程介紹
     }
 
     // 建立並提交 ECPay 表單
     function submitToECPay(params) {
-      // 清空表單
       ecpayForm.innerHTML = '';
-      
-      // 設定 action URL（使用固定的綠界 URL）
       ecpayForm.action = ECPAY_URL;
-      
-      // 建立 hidden inputs
       var keys = Object.keys(params);
       for (var i = 0; i < keys.length; i++) {
         var key = keys[i];
@@ -228,12 +292,8 @@
         input.value = params[key];
         ecpayForm.appendChild(input);
       }
-      
-      // 除錯：在 console 顯示參數
       console.log('ECPay Form Action:', ecpayForm.action);
       console.log('ECPay Params:', params);
-      
-      // 提交表單
       ecpayForm.submit();
     }
 
@@ -294,16 +354,11 @@
         
         if (result.success) {
           if (payMethod === 'ecpay' && result.ecpayParams) {
-            // 顯示 loading overlay
             loadingOverlay.classList.add('show');
-            
-            // 稍微延遲後提交到綠界
             setTimeout(function() {
               submitToECPay(result.ecpayParams);
             }, 300);
-            
           } else {
-            // Bank transfer
             if (bankLast5 && bankLast5.length === 5) {
               window.location.href = 'https://nickleo051216.github.io/n8ncourse/course-success.html?order=' + result.orderId + '&name=' + encodeURIComponent(name) + '&status=pending';
             } else {
