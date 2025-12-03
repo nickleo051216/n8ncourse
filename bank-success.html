@@ -6,6 +6,7 @@
   <title>報名登記成功 - ZN Studio n8n 實作課</title>
   <meta name="description" content="感謝您報名 ZN Studio 的 n8n 實作課程，請於期限內完成匯款" />
   <style>
+    /* --------- CSS 樣式保持不變 --------- */
     :root{--accent:#0ea5a4;--dark:#0f1724;--muted:#6b7280;--card:#0b1220;--bg:#071026;--warning:#f59e0b;font-family: "Noto Sans TC", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;}
     *{box-sizing:border-box}
     body{margin:0;background: linear-gradient(180deg,#041227 0%, #071026 60%);color:#e6eef6;-webkit-font-smoothing:antialiased;padding:32px;min-height:100vh;display:flex;align-items:center;justify-content:center;}
@@ -97,7 +98,7 @@
       </div>
       <div class="bank-row">
         <span class="bank-label">匯款金額</span>
-        <span class="bank-value highlight">NT$ 2,999<button class="copy-btn" onclick="copyToClipboard('2999', this)">複製</button></span>
+        <span class="bank-value highlight" id="bankPriceCell">NT$ 2,200<button class="copy-btn" onclick="copyToClipboard('2200', this)">複製</button></span>
       </div>
     </div>
 
@@ -144,6 +145,23 @@
       return `${deadline.getFullYear()}/${deadline.getMonth() + 1}/${deadline.getDate()}（${weekdays[deadline.getDay()]}）23:59 前`;
     }
     
+    // ===== 自動變價邏輯 =====
+    function checkPrice() {
+      const earlyBirdDeadline = new Date("2025-12-08T12:00:00+08:00").getTime();
+      const now = new Date().getTime();
+      const priceElement = document.getElementById('bankPriceCell');
+      
+      if (priceElement) {
+        if (now < earlyBirdDeadline) {
+          // 早鳥價
+          priceElement.innerHTML = 'NT$ 2,200 <button class="copy-btn" onclick="copyToClipboard(\'2200\', this)">複製</button>';
+        } else {
+          // 原價
+          priceElement.innerHTML = 'NT$ 3,000 <button class="copy-btn" onclick="copyToClipboard(\'3000\', this)">複製</button>';
+        }
+      }
+    }
+
     window.addEventListener('DOMContentLoaded', function() {
       const orderNumber = getUrlParameter('order');
       if (orderNumber) {
@@ -161,6 +179,9 @@
       }
       
       document.getElementById('deadlineDate').textContent = getDeadlineDate();
+      
+      // 執行自動變價檢查
+      checkPrice();
     });
     
     function copyToClipboard(text, button) {
