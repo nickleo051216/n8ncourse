@@ -6,15 +6,47 @@
   <title>ZN Studio — n8n 實作課 報名表</title>
   <meta name="description" content="ZN Studio：從零開始，用 n8n 打造屬於你的第一條自動化流程 — 報名表" />
   <style>
-    /* --------- CSS 樣式保持不變 --------- */
-    :root{--accent:#0ea5a4;--dark:#0f1724;--muted:#6b7280;--card:#0b1220;--bg:#071026;font-family: "Noto Sans TC", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;}
+    /* --------- 基本樣式 --------- */
+    :root{--accent:#0ea5a4;--dark:#0f1724;--muted:#6b7280;--card:#0b1220;--bg:#071026;--warning:#f59e0b;font-family: "Noto Sans TC", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;}
     *{box-sizing:border-box}
     body{margin:0;background: linear-gradient(180deg,#041227 0%, #071026 60%);color:#e6eef6;-webkit-font-smoothing:antialiased;padding:32px;min-height:100vh;}
     .container{max-width:980px;margin:0 auto;background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:12px;padding:28px;box-shadow: 0 8px 30px rgba(2,6,23,0.6);border:1px solid rgba(255,255,255,0.03);}
+    
+    /* --------- Header --------- */
     header{display:flex;gap:16px;align-items:center;margin-bottom:20px}
     .hero-img{width:120px;height:80px;border-radius:8px;overflow:hidden;flex-shrink:0;box-shadow: 0 6px 20px rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;}
     h1{font-size:20px;margin:0 0 4px 0}
     p.lead{margin:0;color:var(--muted);font-size:14px}
+    
+    /* --------- 早鳥倒數區塊 --------- */
+    .countdown-box {
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      margin-bottom: 24px;
+      animation: pulse 2s infinite;
+      display: none; /* JS 控制顯示 */
+    }
+    .countdown-title {color: #f59e0b;font-weight: 700;font-size: 16px;margin-bottom: 8px;letter-spacing: 1px;}
+    .countdown-timer {font-size: 28px;font-weight: 700;color: #e6eef6;font-family: monospace;margin: 8px 0;text-shadow: 0 0 10px rgba(245, 158, 11, 0.3);}
+    .countdown-info {font-size: 14px;color: #9ca3af;}
+    .countdown-info .highlight {color: #0ea5a4;font-size: 18px;font-weight: 700;margin: 0 4px;}
+    .countdown-info .strike {text-decoration: line-through;opacity: 0.7;}
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.2); }
+      70% { box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+    }
+
+    /* --------- 課程介紹區塊 --------- */
+    .course-intro {margin-bottom: 24px;}
+    .course-list-title {color: #0ea5a4; font-size: 14px; font-weight: 600; margin: 12px 0 6px 0;}
+    .course-list {margin: 0; padding-left: 20px; font-size: 14px; color: #d1d5db; line-height: 1.6;}
+    .course-list li {margin-bottom: 4px;}
+
+    /* --------- 表單元件 --------- */
     .card{background:var(--card);padding:18px;border-radius:10px;margin-bottom:18px;border:1px solid rgba(255,255,255,0.03)}
     .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
     label{display:block;font-size:13px;color:#cfe8ec;margin-bottom:6px}
@@ -27,11 +59,13 @@
     .radio-row{display:flex;gap:12px;align-items:center}
     .radio{display:flex;gap:8px;align-items:center;padding:8px 10px;border-radius:8px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));border:1px solid rgba(255,255,255,0.02)}
     .muted{color:var(--muted);font-size:13px}
+    
+    /* --------- 按鈕與互動 --------- */
     .actions{display:flex;gap:12px;align-items:center;justify-content:flex-end;margin-top:12px}
     button.primary{background:linear-gradient(90deg,var(--accent),#06b6d4);color:#052024;padding:12px 18px;border-radius:10px;border:none;font-weight:600;cursor:pointer;box-shadow:0 6px 18px rgba(13,148,136,0.18)}
     button.ghost{background:transparent;color:var(--muted);padding:10px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);cursor:pointer}
     
-    /* 折疊區塊樣式 */
+    /* 折疊選單 */
     .collapsible{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:8px;margin-top:12px;overflow:hidden;}
     .collapsible-header{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;cursor:pointer;user-select:none;transition: background 0.2s;}
     .collapsible-header:hover{background:rgba(255,255,255,0.03);}
@@ -39,20 +73,17 @@
     .collapsible-arrow{font-size:12px;color:var(--muted);transition: transform 0.3s;}
     .collapsible.open .collapsible-arrow{transform: rotate(180deg);}
     .collapsible-content{max-height:0;overflow:hidden;transition: max-height 0.3s ease-out;}
-    .collapsible.open .collapsible-content{max-height:800px;} /* 增加高度以容納長內容 */
+    .collapsible.open .collapsible-content{max-height:800px;}
     .collapsible-inner{padding:0 14px 14px 14px;}
-    
-    /* 課程介紹列表樣式 */
-    .course-list-title {color: #0ea5a4; font-size: 14px; font-weight: 600; margin: 12px 0 6px 0;}
-    .course-list {margin: 0; padding-left: 20px; font-size: 14px; color: #d1d5db; line-height: 1.6;}
-    .course-list li {margin-bottom: 4px;}
 
+    /* 銀行表格 */
     .bank-table{width:100%;border-collapse:collapse;margin-top:8px;}
     .bank-table td{padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:14px;}
     .bank-table td:first-child{color:var(--muted);width:80px;}
     .bank-table td:last-child{color:#e6eef6;font-weight:500;}
     .bank-table tr:last-child td{border-bottom:none;}
     .bank-table .highlight{color:#0ea5a4;font-size:16px;font-weight:700;}
+    
     .optional-tag{display:inline-block;background:rgba(107,114,128,0.2);color:#9ca3af;font-size:11px;padding:2px 6px;border-radius:4px;margin-left:6px;font-weight:normal;}
     .hint{display:flex;align-items:flex-start;gap:6px;margin-top:8px;padding:10px 12px;background:rgba(14,165,164,0.05);border-radius:6px;border:1px solid rgba(14,165,164,0.1);}
     .hint-icon{flex-shrink:0;font-size:14px;}
@@ -98,6 +129,15 @@
         <p class="lead">小班 15 人 • 台北市中正區許昌街 42 之 1 號 4 樓 D 教室 • 13:00–17:00</p>
       </div>
     </header>
+
+    <div id="earlyBirdBox" class="countdown-box">
+      <div class="countdown-title">🔥 早鳥優惠倒數中</div>
+      <div class="countdown-timer" id="countdownTimer">00 天 00 時 00 分 00 秒</div>
+      <div class="countdown-info">
+        早鳥價 <span class="highlight">NT$ 2,200</span> <span class="small">(原價 <span class="strike">$3,000</span>)</span><br/>
+        <span style="font-size:12px;color:#f59e0b;margin-top:4px;display:block;">🎁 加贈：優先加入 Nick VIP 群組</span>
+      </div>
+    </div>
 
     <section class="card course-intro" style="border:1px solid rgba(14,165,164,0.3);box-shadow:0 0 15px rgba(14,165,164,0.1);">
         <div style="text-align:center;margin-bottom:20px;">
@@ -191,7 +231,9 @@
           <div class="collapsible" id="bankInfoCollapsible">
             <div class="collapsible-header" onclick="toggleBankInfo()"><span class="collapsible-title"><span>🏦</span><span>查看匯款帳號資訊</span></span><span class="collapsible-arrow">▼</span></div>
             <div class="collapsible-content"><div class="collapsible-inner">
-              <table class="bank-table"><tr><td>銀行</td><td>國泰世華銀行（013）</td></tr><tr><td>分行</td><td>中和分行</td></tr><tr><td>戶名</td><td>張家寧</td></tr><tr><td>帳號</td><td>012345678901234</td></tr><tr><td>金額</td><td class="highlight">NT$ 2,999</td></tr></table>
+              <table class="bank-table"><tr><td>銀行</td><td>國泰世華銀行（013）</td></tr><tr><td>分行</td><td>中和分行</td></tr><tr><td>戶名</td><td>張家寧</td></tr><tr><td>帳號</td><td>012345678901234</td></tr>
+              <tr><td>金額</td><td class="highlight" id="bankPriceCell">NT$ 2,200</td></tr>
+              </table>
             </div></div>
           </div>
           <div style="margin-top:16px"><label for="bankLast5">匯款帳號末 5 碼<span class="optional-tag">選填</span></label><input id="bankLast5" name="bankLast5" type="text" placeholder="例如：12345" maxlength="5" /><div class="small">已完成匯款者請填寫，方便我們核對款項</div></div>
@@ -276,7 +318,7 @@
       otherQtyWrap.style.display = 'none'; 
       threeInvoice.style.display = 'none';
       document.getElementById('bankInfoCollapsible').classList.remove('open');
-      document.getElementById('courseDetailCollapsible').classList.remove('open'); // 重設時也關閉課程介紹
+      document.getElementById('courseDetailCollapsible').classList.remove('open');
     }
 
     // 建立並提交 ECPay 表單
@@ -377,6 +419,52 @@
         submitBtn.disabled = false; 
         submitBtn.textContent = '提交報名';
       });
+    });
+
+    // ===== 早鳥倒數與自動變價邏輯 =====
+    function initEarlyBirdSystem() {
+      // 設定早鳥截止時間：2025/12/08 中午 12:00
+      const deadline = new Date("2025-12-08T12:00:00+08:00").getTime();
+      const boxElement = document.getElementById("earlyBirdBox");
+      const timerElement = document.getElementById("countdownTimer");
+      
+      const updateTimer = setInterval(function() {
+        const now = new Date().getTime();
+        const distance = deadline - now;
+
+        if (distance > 0) {
+          boxElement.style.display = "block";
+          
+          const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+          const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+          const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+          const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+          const f = (n) => n < 10 ? "0" + n : n;
+          timerElement.innerHTML = `${days} 天 ${f(hours)} 時 ${f(minutes)} 分 ${f(seconds)} 秒`;
+          
+          updateBankPriceDisplay(true); // 早鳥價
+        } else {
+          clearInterval(updateTimer);
+          boxElement.style.display = "none";
+          updateBankPriceDisplay(false); // 原價
+        }
+      }, 1000);
+    }
+
+    function updateBankPriceDisplay(isEarlyBird) {
+      const priceCell = document.getElementById('bankPriceCell');
+      if (priceCell) {
+        if (isEarlyBird) {
+          priceCell.innerHTML = 'NT$ 2,200';
+        } else {
+          priceCell.innerHTML = 'NT$ 3,000';
+        }
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', function() {
+      initEarlyBirdSystem();
     });
   </script>
 </body>
