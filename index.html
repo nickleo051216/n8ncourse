@@ -104,11 +104,11 @@
   <div class="container" role="main">
     <header>
       <div class="hero-img" aria-hidden="true">
-        <img src="https://via.placeholder.com/120x80/083047/0ea5a4?text=n8n" alt="n8n workflow" id="coverImg" />
+        <img src="https://drive.google.com/file/d/1u1WAUTMJibRMicND39ydpLAVxldHl-0V/view?usp=drive_link" alt="n8n workflow" id="coverImg" />
       </div>
       <div>
         <h1>🚀 ZN Studio — 從零開始的 n8n 實作課（12/20）</h1>
-        <p class="lead">小班 15 人 • 台北中正 • 13:00–17:00 • 教你完成第一條自動化流程</p>
+        <p class="lead">小班 15 人 • 台北市中正區許昌街 42 之 1 號 4 樓 D 教室 • 13:00–17:00 • 教你完成第一條自動化流程</p>
       </div>
     </header>
 
@@ -199,7 +199,7 @@
 
         <!-- 匯款付款說明 -->
         <div id="bankBox" style="display:none;margin-top:12px">
-          <p class="small">請依下列帳戶資訊匯款，匯款完成請填寫帳號末五碼與匯款時間。</p>
+          <p class="small">請依下列帳戶資訊匯款，匯款完成後請填寫您的匯款帳號末五碼。</p>
 
           <div class="note" id="bankInfo">
             <strong>銀行名稱：</strong> 台灣銀行<br/>
@@ -207,15 +207,10 @@
             <strong>銀行帳號：</strong> 01234567890123
           </div>
 
-          <div style="margin-top:10px" class="grid">
-            <div>
-              <label for="bankLast5">匯款帳號末 5 碼</label>
-              <input id="bankLast5" name="bankLast5" type="text" placeholder="例如：12345" />
-            </div>
-            <div>
-              <label for="bankTime">匯款時間</label>
-              <input id="bankTime" name="bankTime" type="text" placeholder="YYYY-MM-DD HH:MM" />
-            </div>
+          <div style="margin-top:10px">
+            <label for="bankLast5">您的匯款帳號末 5 碼（匯款完成後填寫）</label>
+            <input id="bankLast5" name="bankLast5" type="text" placeholder="例如：12345" maxlength="5" />
+            <div class="small">範例：如果您的帳號是 123-456-789012，請填寫 89012</div>
           </div>
         </div>
       </section>
@@ -363,7 +358,6 @@
         
         // 銀行匯款
         bankLast5: document.getElementById('bankLast5').value || '',
-        bankTime: document.getElementById('bankTime').value || '',
         
         // 發票資訊
         invType: document.querySelector('input[name="invType"]:checked').value,
