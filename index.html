@@ -400,11 +400,10 @@
             
             // 建立自動提交的表單
             createECPayForm(result.ecpayUrl, result.ecpayParams);
-          } else {
-            // 匯款的話，顯示提示並導向成功頁
-            alert(`✅ 報名成功！\n訂單編號：${result.orderId}\n\n請依頁面上的匯款資訊完成匯款。\n我們確認後會與您聯絡。`);
-            window.location.href = `https://nickleo051216.github.io/n8ncourse/course-success.html?order=${result.orderId}&name=${encodeURIComponent(name)}`;
-          }
+        } else {
+            // 匯款的話，跳轉到匯款專屬頁面
+            window.location.href = `https://nickleo051216.github.io/n8ncourse/bank-success.html?order=${result.orderId}&name=${encodeURIComponent(name)}`;
+        }
         } else {
           alert('❌ 報名失敗：' + (result.error || '未知錯誤'));
         }
@@ -470,3 +469,4 @@
   </script>
 </body>
 </html>
+
