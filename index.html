@@ -103,12 +103,12 @@
 <body>
   <div class="container" role="main">
     <header>
-<div class="hero-img" aria-hidden="true" style="background:linear-gradient(135deg,#0ea5a4,#06b6d4);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(14,165,164,0.4);">
-  <div style="text-align:center;">
-    <div style="font-size:28px;font-weight:700;color:#052024;letter-spacing:3px;line-height:1;">ZN</div>
-    <div style="font-size:8px;color:#052024;margin-top:4px;letter-spacing:2px;font-weight:600;">STUDIO</div>
-  </div>
-</div>
+      <div class="hero-img" aria-hidden="true" style="background:linear-gradient(135deg,#0ea5a4,#06b6d4);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(14,165,164,0.4);">
+        <div style="text-align:center;">
+          <div style="font-size:28px;font-weight:700;color:#052024;letter-spacing:3px;line-height:1;">ZN</div>
+          <div style="font-size:8px;color:#052024;margin-top:4px;letter-spacing:2px;font-weight:600;">STUDIO</div>
+        </div>
+      </div>
       <div>
         <h1>🚀 ZN Studio — 從零開始的 n8n 實作課（12/20）</h1>
         <p class="lead">小班 15 人 • 台北市中正區許昌街 42 之 1 號 4 樓 D 教室 • 13:00–17:00 • 教你完成第一條自動化流程</p>
@@ -393,15 +393,16 @@
 
         // === 處理回應 ===
         if (result.success) {
-          // 如果是綠界付款，導向付款頁
-          if (formData.payMethod === 'ecpay' && result.paymentUrl) {
+          // 如果是綠界付款，處理 ECPay 參數
+          if (formData.payMethod === 'ecpay' && result.ecpayParams) {
+            // 顯示提示
             alert(`✅ 報名成功！\n訂單編號：${result.orderId}\n\n即將導向綠界付款頁面...`);
-            // 跳轉到付款成功頁面（帶上訂單編號和姓名）
-            window.location.href = `https://nickleo051216.github.io/n8ncourse/course-success.html?order=${result.orderId}&name=${encodeURIComponent(name)}`;
+            
+            // 建立自動提交的表單
+            createECPayForm(result.ecpayUrl, result.ecpayParams);
           } else {
-            // 匯款的話，顯示提示
+            // 匯款的話，顯示提示並導向成功頁
             alert(`✅ 報名成功！\n訂單編號：${result.orderId}\n\n請依頁面上的匯款資訊完成匯款。\n我們確認後會與您聯絡。`);
-            // 可以導向匯款說明頁或成功頁
             window.location.href = `https://nickleo051216.github.io/n8ncourse/course-success.html?order=${result.orderId}&name=${encodeURIComponent(name)}`;
           }
         } else {
@@ -416,10 +417,56 @@
         submitBtn.textContent = '提交報名';
       }
     });
+
+    // ===== 建立並自動提交 ECPay 表單 =====
+    function createECPayForm(url, params) {
+      // 建立表單元素
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = url;
+      form.style.display = 'none';
+      
+      // 加入所有參數
+      for (const key in params) {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = key;
+        input.value = params[key];
+        form.appendChild(input);
+      }
+      
+      // 加到頁面並自動送出
+      document.body.appendChild(form);
+      
+      // 顯示 loading 畫面（保留 ZN STUDIO logo）
+      document.body.innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:center;height:100vh;background:linear-gradient(180deg,#041227 0%, #071026 60%);color:#e6eef6;font-family:'Noto Sans TC',sans-serif;">
+          <div style="text-align:center;">
+            <div style="width:80px;height:80px;margin:0 auto 24px;background:linear-gradient(135deg,#0ea5a4,#06b6d4);border-radius:12px;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(14,165,164,0.4);">
+              <div>
+                <div style="font-size:32px;font-weight:700;color:#052024;letter-spacing:3px;line-height:1;">ZN</div>
+                <div style="font-size:9px;color:#052024;margin-top:4px;letter-spacing:2px;font-weight:600;">STUDIO</div>
+              </div>
+            </div>
+            <div style="border:4px solid rgba(255,255,255,0.1);border-top:4px solid #0ea5a4;border-radius:50%;width:40px;height:40px;animation:spin 1s linear infinite;margin:0 auto 20px;"></div>
+            <p style="font-size:16px;margin:0 0 8px 0;">正在導向綠界付款頁面...</p>
+            <p style="font-size:14px;color:#6b7280;margin:0;">請稍候，不要關閉此頁面</p>
+          </div>
+        </div>
+        <style>
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        </style>
+      `;
+      document.body.appendChild(form);
+      
+      // 延遲一點再送出，讓用戶看到 loading
+      setTimeout(() => {
+        form.submit();
+      }, 500);
+    }
   </script>
 </body>
 </html>
-
-
-
-
