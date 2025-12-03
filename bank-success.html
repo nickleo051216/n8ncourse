@@ -1,0 +1,577 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>報名登記成功 - ZN Studio n8n 實作課</title>
+  <meta name="description" content="感謝您報名 ZN Studio 的 n8n 實作課程，請於期限內完成匯款" />
+  <style>
+    /* --------- Reset & 基本 --------- */
+    :root{
+      --accent:#0ea5a4;
+      --dark:#0f1724;
+      --muted:#6b7280;
+      --card:#0b1220;
+      --bg:#071026;
+      --glass: rgba(255,255,255,0.04);
+      --warning:#f59e0b;
+      font-family: "Noto Sans TC", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      background: linear-gradient(180deg,#041227 0%, #071026 60%);
+      color:#e6eef6;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      padding:32px;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .container{
+      max-width:680px;
+      width:100%;
+      margin:0 auto;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:16px;
+      padding:40px;
+      box-shadow: 0 8px 30px rgba(2,6,23,0.6);
+      border:1px solid rgba(255,255,255,0.03);
+    }
+
+    /* --------- 成功圖示 --------- */
+    .success-icon{
+      width:80px;
+      height:80px;
+      margin:0 auto 24px;
+      background:linear-gradient(135deg, #f59e0b, #fbbf24);
+      border-radius:50%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:48px;
+      box-shadow: 0 6px 24px rgba(245,158,11,0.4);
+      animation: scaleIn 0.5s ease-out;
+    }
+    @keyframes scaleIn {
+      0% { transform: scale(0); opacity: 0; }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    h1{
+      font-size:28px;
+      margin:0 0 12px 0;
+      text-align:center;
+      background: linear-gradient(90deg, #f59e0b, #fbbf24);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    p.lead{
+      margin:0 0 32px 0;
+      color:var(--muted);
+      font-size:15px;
+      text-align:center;
+      line-height:1.6;
+    }
+
+    /* --------- 訂單編號 --------- */
+    .order-info{
+      text-align:center;
+      margin-bottom:24px;
+    }
+    .order-box{
+      background:rgba(245,158,11,0.08);
+      padding:12px 20px;
+      border-radius:8px;
+      display:inline-block;
+      border:1px solid rgba(245,158,11,0.15);
+    }
+    .order-label{
+      color:var(--muted);
+      font-size:13px;
+      margin-right:8px;
+    }
+    .order-number{
+      color:#f59e0b;
+      font-weight:600;
+      font-size:15px;
+      letter-spacing:0.5px;
+    }
+
+    /* --------- 重要提醒 --------- */
+    .warning-notice{
+      background:rgba(245,158,11,0.1);
+      padding:16px;
+      border-radius:10px;
+      color:#fcd34d;
+      font-size:14px;
+      border:1px solid rgba(245,158,11,0.2);
+      margin-bottom:24px;
+      line-height:1.6;
+      text-align:center;
+    }
+    .warning-notice strong{color:#f59e0b}
+    .deadline{
+      font-size:18px;
+      font-weight:700;
+      color:#f59e0b;
+      display:block;
+      margin-top:8px;
+    }
+
+    /* --------- 匯款資訊卡片 --------- */
+    .bank-info{
+      background:var(--card);
+      padding:24px;
+      border-radius:12px;
+      margin-bottom:24px;
+      border:1px solid rgba(255,255,255,0.03);
+    }
+    .bank-title{
+      font-size:18px;
+      font-weight:600;
+      margin:0 0 16px 0;
+      color:#cfe8ec;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .bank-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:12px 0;
+      border-bottom:1px solid rgba(255,255,255,0.04);
+    }
+    .bank-row:last-child{border-bottom:none}
+    .bank-label{
+      color:var(--muted);
+      font-size:14px;
+    }
+    .bank-value{
+      color:#e6eef6;
+      font-size:15px;
+      font-weight:500;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .bank-value.highlight{
+      color:#0ea5a4;
+      font-size:18px;
+      font-weight:700;
+    }
+    .copy-btn{
+      background:rgba(14,165,164,0.15);
+      border:1px solid rgba(14,165,164,0.3);
+      color:#0ea5a4;
+      padding:4px 10px;
+      border-radius:6px;
+      font-size:12px;
+      cursor:pointer;
+      transition: all 0.2s;
+    }
+    .copy-btn:hover{
+      background:rgba(14,165,164,0.25);
+    }
+    .copy-btn.copied{
+      background:rgba(34,197,94,0.2);
+      border-color:rgba(34,197,94,0.4);
+      color:#22c55e;
+    }
+
+    /* --------- 課程資訊卡片 --------- */
+    .course-info{
+      background:var(--card);
+      padding:24px;
+      border-radius:12px;
+      margin-bottom:24px;
+      border:1px solid rgba(255,255,255,0.03);
+    }
+    .course-title{
+      font-size:18px;
+      font-weight:600;
+      margin:0 0 16px 0;
+      color:#cfe8ec;
+    }
+    .info-row{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      margin-bottom:12px;
+      font-size:14px;
+    }
+    .info-row:last-child{margin-bottom:0}
+    .info-icon{
+      font-size:20px;
+      width:32px;
+      text-align:center;
+      flex-shrink:0;
+    }
+    .info-label{
+      color:var(--muted);
+      min-width:60px;
+    }
+    .info-value{
+      color:#e6eef6;
+      flex:1;
+    }
+
+    /* --------- 步驟說明 --------- */
+    .steps{
+      background:var(--card);
+      padding:20px;
+      border-radius:12px;
+      margin-bottom:24px;
+      border:1px solid rgba(255,255,255,0.03);
+    }
+    .step-title{
+      font-size:15px;
+      font-weight:600;
+      margin:0 0 12px 0;
+      color:#cfe8ec;
+    }
+    .step-item{
+      display:flex;
+      gap:12px;
+      margin-bottom:12px;
+      font-size:14px;
+      line-height:1.6;
+    }
+    .step-item:last-child{margin-bottom:0}
+    .step-num{
+      background:linear-gradient(135deg, #f59e0b, #fbbf24);
+      color:#052024;
+      width:24px;
+      height:24px;
+      border-radius:50%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:600;
+      font-size:12px;
+      flex-shrink:0;
+    }
+    .step-text{
+      color:#e6eef6;
+      flex:1;
+    }
+
+    /* --------- 行動按鈕區 --------- */
+    .actions{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      margin-bottom:24px;
+    }
+    .btn{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      padding:14px 20px;
+      border-radius:10px;
+      border:none;
+      font-weight:600;
+      cursor:pointer;
+      text-decoration:none;
+      font-size:15px;
+      transition: all 0.2s;
+    }
+    .btn-primary{
+      background:linear-gradient(90deg,var(--accent),#06b6d4);
+      color:#052024;
+      box-shadow:0 6px 18px rgba(13,148,136,0.18);
+    }
+    .btn-primary:hover{
+      transform: translateY(-2px);
+      box-shadow:0 8px 24px rgba(13,148,136,0.28);
+    }
+    .btn-secondary{
+      background:rgba(255,255,255,0.04);
+      color:#cfe8ec;
+      border:1px solid rgba(255,255,255,0.08);
+    }
+    .btn-secondary:hover{
+      background:rgba(255,255,255,0.08);
+    }
+
+    /* --------- 聯絡資訊 --------- */
+    .contact{
+      text-align:center;
+      padding-top:24px;
+      border-top:1px solid rgba(255,255,255,0.04);
+    }
+    .contact-title{
+      font-size:14px;
+      color:var(--muted);
+      margin:0 0 12px 0;
+    }
+    .contact-links{
+      display:flex;
+      justify-content:center;
+      gap:16px;
+      flex-wrap:wrap;
+    }
+    .contact-link{
+      color:#0ea5a4;
+      text-decoration:none;
+      font-size:14px;
+      display:flex;
+      align-items:center;
+      gap:6px;
+    }
+    .contact-link:hover{
+      text-decoration:underline;
+    }
+
+    /* --------- 響應式 --------- */
+    @media (max-width:640px){
+      body{padding:16px}
+      .container{padding:24px}
+      h1{font-size:24px}
+      .success-icon{width:64px;height:64px;font-size:36px}
+      .bank-info{padding:16px}
+      .bank-row{flex-direction:column;align-items:flex-start;gap:4px}
+      .info-row{flex-direction:column;align-items:flex-start;gap:4px}
+      .info-label{min-width:auto}
+    }
+
+    /* --------- 動畫 --------- */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container" role="main">
+    <!-- 成功圖示 -->
+    <div class="success-icon" role="img" aria-label="待付款">
+      📋
+    </div>
+
+    <h1>📝 報名登記成功！</h1>
+    <p class="lead" id="welcomeMessage">
+      感謝您報名 ZN Studio 的 n8n 實作課程<br/>
+      請於期限內完成匯款，即可完成報名
+    </p>
+    
+    <!-- 訂單編號 -->
+    <div class="order-info" id="orderInfo" style="display:none">
+      <div class="order-box">
+        <span class="order-label">訂單編號</span>
+        <span class="order-number" id="orderNumber"></span>
+      </div>
+    </div>
+
+    <!-- 重要提醒 -->
+    <div class="warning-notice" role="alert">
+      <strong>⚠️ 重要提醒</strong><br/>
+      請於 <strong>三天內</strong> 完成匯款，逾期將自動取消報名資格
+      <span class="deadline" id="deadlineDate"></span>
+    </div>
+
+    <!-- 匯款資訊 -->
+    <div class="bank-info">
+      <h2 class="bank-title">🏦 匯款資訊</h2>
+      
+      <div class="bank-row">
+        <span class="bank-label">銀行名稱</span>
+        <span class="bank-value">
+          國泰世華銀行（013）
+          <button class="copy-btn" onclick="copyToClipboard('國泰世華銀行 013', this)">複製</button>
+        </span>
+      </div>
+      
+      <div class="bank-row">
+        <span class="bank-label">分行名稱</span>
+        <span class="bank-value">中和分行</span>
+      </div>
+      
+      <div class="bank-row">
+        <span class="bank-label">戶名</span>
+        <span class="bank-value">
+          張家寧
+          <button class="copy-btn" onclick="copyToClipboard('張家寧', this)">複製</button>
+        </span>
+      </div>
+      
+      <div class="bank-row">
+        <span class="bank-label">銀行帳號</span>
+        <span class="bank-value">
+          012345678901234
+          <button class="copy-btn" onclick="copyToClipboard('012345678901234', this)">複製</button>
+        </span>
+      </div>
+      
+      <div class="bank-row">
+        <span class="bank-label">匯款金額</span>
+        <span class="bank-value highlight">
+          NT$ 2,999
+          <button class="copy-btn" onclick="copyToClipboard('2999', this)">複製</button>
+        </span>
+      </div>
+    </div>
+
+    <!-- 課程資訊 -->
+    <div class="course-info">
+      <h2 class="course-title">📚 課程資訊</h2>
+      <div class="info-row">
+        <span class="info-icon">🎯</span>
+        <span class="info-label">課程名稱</span>
+        <span class="info-value">從零開始，用 n8n 打造屬於你的第一條自動化流程</span>
+      </div>
+      <div class="info-row">
+        <span class="info-icon">📅</span>
+        <span class="info-label">上課日期</span>
+        <span class="info-value">2025 年 12 月 20 日（星期六）</span>
+      </div>
+      <div class="info-row">
+        <span class="info-icon">⏰</span>
+        <span class="info-label">上課時間</span>
+        <span class="info-value">13:00 - 17:00（4 小時）</span>
+      </div>
+      <div class="info-row">
+        <span class="info-icon">📍</span>
+        <span class="info-label">上課地點</span>
+        <span class="info-value">台北市中正區許昌街 42 之 1 號 4 樓 D 教室</span>
+      </div>
+    </div>
+
+    <!-- 匯款後步驟 -->
+    <div class="steps">
+      <h3 class="step-title">📋 匯款後請這樣做</h3>
+      <div class="step-item">
+        <span class="step-num">1</span>
+        <span class="step-text">
+          <strong>完成匯款</strong>：請至您的網路銀行或 ATM 完成轉帳
+        </span>
+      </div>
+      <div class="step-item">
+        <span class="step-num">2</span>
+        <span class="step-text">
+          <strong>通知我們</strong>：匯款完成後，請透過 Line OA 告知您的<strong>訂單編號</strong>和<strong>帳號末五碼</strong>
+        </span>
+      </div>
+      <div class="step-item">
+        <span class="step-num">3</span>
+        <span class="step-text">
+          <strong>等待確認</strong>：我們會在 1-2 個工作天內確認款項並回覆您
+        </span>
+      </div>
+      <div class="step-item">
+        <span class="step-num">4</span>
+        <span class="step-text">
+          <strong>收到確認信</strong>：確認付款後，您會收到課程確認信和 Line 社群邀請
+        </span>
+      </div>
+    </div>
+
+    <!-- 行動按鈕 -->
+    <div class="actions">
+      <a href="https://lin.ee/Faz0doj" target="_blank" class="btn btn-primary">
+        💬 匯款後請點此通知我們（Line OA）
+      </a>
+      <a href="https://reurl.cc/1OZNAY" target="_blank" class="btn btn-secondary">
+        👥 先加入 Line 社群（課前交流）
+      </a>
+    </div>
+
+    <!-- 聯絡資訊 -->
+    <div class="contact">
+      <p class="contact-title">有任何問題嗎？歡迎聯絡我們：</p>
+      <div class="contact-links">
+        <a href="mailto:nickleo051216@gmail.com" class="contact-link">
+          <span>📧</span>
+          <span>Email</span>
+        </a>
+        <a href="https://lin.ee/Faz0doj" target="_blank" class="contact-link">
+          <span>💬</span>
+          <span>Line OA</span>
+        </a>
+        <a href="tel:0932684051" class="contact-link">
+          <span>📞</span>
+          <span>0932-684-051</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ========== 讀取 URL 參數並個人化顯示 ==========
+    
+    function getUrlParameter(name) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(name);
+    }
+    
+    // 計算截止日期（三天後）
+    function getDeadlineDate() {
+      const deadline = new Date();
+      deadline.setDate(deadline.getDate() + 3);
+      
+      const year = deadline.getFullYear();
+      const month = deadline.getMonth() + 1;
+      const day = deadline.getDate();
+      const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+      const weekday = weekdays[deadline.getDay()];
+      
+      return `${year}/${month}/${day}（${weekday}）23:59 前`;
+    }
+    
+    // 頁面載入時處理
+    window.addEventListener('DOMContentLoaded', function() {
+      // 讀取訂單編號
+      const orderNumber = getUrlParameter('order');
+      if (orderNumber) {
+        document.getElementById('orderNumber').textContent = orderNumber;
+        document.getElementById('orderInfo').style.display = 'block';
+      }
+      
+      // 讀取學員姓名
+      const studentName = getUrlParameter('name');
+      if (studentName) {
+        const welcomeMessage = document.getElementById('welcomeMessage');
+        welcomeMessage.innerHTML = `
+          <strong style="color:#f59e0b">${studentName}</strong> 您好！<br/>
+          感謝您報名 ZN Studio 的 n8n 實作課程<br/>
+          請於期限內完成匯款，即可完成報名
+        `;
+      }
+      
+      // 顯示截止日期
+      document.getElementById('deadlineDate').textContent = getDeadlineDate();
+    });
+    
+    // ========== 複製功能 ==========
+    
+    function copyToClipboard(text, button) {
+      navigator.clipboard.writeText(text).then(function() {
+        // 更新按鈕狀態
+        const originalText = button.textContent;
+        button.textContent = '已複製！';
+        button.classList.add('copied');
+        
+        // 2秒後恢復
+        setTimeout(function() {
+          button.textContent = originalText;
+          button.classList.remove('copied');
+        }, 2000);
+      }).catch(function(err) {
+        console.error('複製失敗:', err);
+        alert('複製失敗，請手動複製');
+      });
+    }
+
+    // 頁面載入時顯示動畫
+    window.addEventListener('load', function() {
+      document.querySelector('.container').style.animation = 'fadeIn 0.5s ease-out';
+    });
+  </script>
+</body>
+</html>
