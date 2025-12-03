@@ -131,7 +131,7 @@
     </header>
 
     <div id="earlyBirdBox" class="countdown-box">
-      <div class="countdown-title">🔥 早鳥優惠倒數中</div>
+      <div class="countdown-title">🔥 早鳥優惠倒數中(截至 12/8 12:00 止 )</div>
       <div class="countdown-timer" id="countdownTimer">00 天 00 時 00 分 00 秒</div>
       <div class="countdown-info">
         早鳥價 <span class="highlight">NT$ 2,200</span> <span class="small">(原價 <span class="strike">$3,000</span>)</span><br/>
@@ -231,22 +231,36 @@
           <div class="collapsible" id="bankInfoCollapsible">
             <div class="collapsible-header" onclick="toggleBankInfo()"><span class="collapsible-title"><span>🏦</span><span>查看匯款帳號資訊</span></span><span class="collapsible-arrow">▼</span></div>
             <div class="collapsible-content"><div class="collapsible-inner">
-              <table class="bank-table"><tr><td>銀行</td><td>國泰世華銀行（013）</td></tr><tr><td>分行</td><td>中和分行</td></tr><tr><td>戶名</td><td>張家寧</td></tr><tr><td>帳號</td><td>012345678901234</td></tr>
+              <table class="bank-table"><tr><td>銀行</td><td>台新國際商業銀行（812）</td></tr><tr><td>分行</td><td>中和分行</td></tr><tr><td>戶名</td><td>張惟荏</td></tr><tr><td>帳號</td><td>20491000060101</td></tr>
               <tr><td>金額</td><td class="highlight" id="bankPriceCell">NT$ 2,200</td></tr>
               </table>
             </div></div>
           </div>
           <div style="margin-top:16px"><label for="bankLast5">匯款帳號末 5 碼<span class="optional-tag">選填</span></label><input id="bankLast5" name="bankLast5" type="text" placeholder="例如：12345" maxlength="5" /><div class="small">已完成匯款者請填寫，方便我們核對款項</div></div>
-          <div class="hint"><span class="hint-icon">💡</span><span class="hint-text"><strong>還沒匯款？</strong>沒關係！送出報名後會顯示完整匯款資訊，請於 <strong>3 天內</strong> 完成匯款即可。</span></div>
+          <div class="hint"><span class="hint-icon">💡</span><span class="hint-text"><strong>還不想匯款？</strong>沒關係！送出報名後會顯示完整匯款資訊，請於 <strong>3 天內</strong> 完成匯款即可。</span></div>
         </div>
       </section>
 
       <section class="card">
-        <h2 style="margin:0 0 8px 0;font-size:15px">四、發票資訊</h2>
-        <div style="display:flex;gap:12px;align-items:center"><label><input type="radio" name="invType" value="two" checked /> 二聯式（個人）</label><label><input type="radio" name="invType" value="three" /> 三聯式（公司）</label></div>
-        <div id="threeInvoice" style="display:none;margin-top:10px"><label for="vatTitle">公司抬頭</label><input id="vatTitle" name="vatTitle" type="text" placeholder="公司抬頭" /><label for="vatNo" style="margin-top:8px">統一編號</label><input id="vatNo" name="vatNo" type="text" placeholder="統編" /></div>
-        <div style="margin-top:8px"><label for="invEmail">發票接收 Email（若為電子發票）</label><input id="invEmail" name="invEmail" type="email" placeholder="receipt@example.com" /></div>
-      </section>
+        <h2 style="margin:0 0 8px 0;font-size:15px">四、收據需求（僅提供個人領據）</h2>
+        <div class="hint" style="margin-top:0;margin-bottom:12px;">
+            <span class="hint-icon">ℹ️</span>
+            <span class="hint-text">我們非公司行號，無法開立統一發票。若公司需報帳，可申請「個人領據」作為憑證。</span>
+        </div>
+        
+        <div style="display:flex;gap:12px;align-items:center">
+            <label><input type="radio" name="invType" value="no" checked /> 不需要</label>
+            <label><input type="radio" name="invType" value="receipt" /> 索取領據（公司報帳用）</label>
+        </div>
+        
+        <div id="receiptInfo" style="display:none;margin-top:10px">
+            <label for="vatTitle">公司抬頭</label>
+            <input id="vatTitle" name="vatTitle" type="text" placeholder="公司抬頭" />
+            <label for="vatNo" style="margin-top:8px">統一編號</label>
+            <input id="vatNo" name="vatNo" type="text" placeholder="統編" />
+        </div>
+        
+        </section>
 
       <section class="card">
         <h2 style="margin:0 0 8px 0;font-size:15px">五、其他備註</h2>
@@ -257,7 +271,7 @@
       <div style="margin-top:12px" class="small">提交後請留意 Email 或 Line，我們將於 1–2 個工作天內確認報名狀態。</div>
     </form>
 
-    <footer style="margin-top:18px;text-align:center;color:var(--muted);font-size:13px">ZN Studio • 小班實作課（名額有限）• 如需發票或收據請於報名時告知</footer>
+    <footer style="margin-top:18px;text-align:center;color:var(--muted);font-size:13px">ZN Studio • 小班實作課（名額有限）• 優先錄取早鳥報名者</footer>
   </div>
 
   <form id="ecpayForm" method="POST" action="https://payment.ecpay.com.tw/Cashier/AioCheckOut/V5" style="display:none;"></form>
@@ -273,8 +287,11 @@
     var qtySelect = document.getElementById('qty');
     var otherQtyWrap = document.getElementById('otherQtyWrap');
     var submitBtn = document.getElementById('submitBtn');
-    var invTypeRadios = document.getElementsByName('invType');
-    var threeInvoice = document.getElementById('threeInvoice');
+    
+    // 修改變數名稱以符合新的邏輯
+    var receiptRadios = document.getElementsByName('invType');
+    var receiptInfoBox = document.getElementById('receiptInfo');
+    
     var loadingOverlay = document.getElementById('loadingOverlay');
     var ecpayForm = document.getElementById('ecpayForm');
 
@@ -294,7 +311,7 @@
       document.getElementById('bankInfoCollapsible').classList.toggle('open'); 
     }
 
-    // 新增：課程詳情折疊開關
+    // 課程詳情折疊開關
     function toggleCourseDetails() {
       document.getElementById('courseDetailCollapsible').classList.toggle('open');
     }
@@ -304,10 +321,11 @@
       if (qtySelect.value !== 'other') document.getElementById('otherQty').value = '';
     });
 
-    var invRadiosArr = Array.prototype.slice.call(invTypeRadios);
-    invRadiosArr.forEach(function(r) { 
+    // ★★★ 修改收據欄位顯示邏輯 ★★★
+    var receiptRadiosArr = Array.prototype.slice.call(receiptRadios);
+    receiptRadiosArr.forEach(function(r) { 
       r.addEventListener('change', function() { 
-        threeInvoice.style.display = r.value === 'three' ? 'block' : 'none'; 
+        receiptInfoBox.style.display = r.value === 'receipt' ? 'block' : 'none'; 
       }); 
     });
 
@@ -316,7 +334,7 @@
       form.reset(); 
       updatePayUI(); 
       otherQtyWrap.style.display = 'none'; 
-      threeInvoice.style.display = 'none';
+      receiptInfoBox.style.display = 'none'; // 重設收據欄位
       document.getElementById('bankInfoCollapsible').classList.remove('open');
       document.getElementById('courseDetailCollapsible').classList.remove('open');
     }
@@ -359,8 +377,10 @@
       var bankLast5 = document.getElementById('bankLast5').value.trim();
       var payMethodEl = document.querySelector('input[name="payMethod"]:checked');
       var payMethod = payMethodEl ? payMethodEl.value : 'ecpay';
-      var invTypeEl = document.querySelector('input[name="invType"]:checked');
-      var invType = invTypeEl ? invTypeEl.value : 'two';
+      
+      // 取得收據資訊
+      var receiptTypeEl = document.querySelector('input[name="invType"]:checked');
+      var receiptType = receiptTypeEl ? receiptTypeEl.value : 'no'; // 'no' or 'receipt'
       
       var formData = { 
         name: name, 
@@ -375,10 +395,15 @@
         payMethod: payMethod, 
         ecpayMethod: document.getElementById('ecpayMethod').value || '', 
         bankLast5: bankLast5, 
-        invType: invType, 
+        
+        // 傳送收據資訊給 n8n
+        // 為了相容你的 n8n 流程，我們繼續使用 invType 這個 key
+        invType: receiptType, 
         vatTitle: document.getElementById('vatTitle').value || '', 
         vatNo: document.getElementById('vatNo').value || '', 
-        invEmail: document.getElementById('invEmail').value || '', 
+        // invEmail 已移除，這裡傳空字串即可
+        invEmail: '', 
+        
         remark: document.getElementById('remark').value.trim() || '' 
       };
       
