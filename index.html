@@ -6,7 +6,6 @@
   <title>ZN Studio — n8n 實作課 報名表</title>
   <meta name="description" content="ZN Studio：從零開始，用 n8n 打造屬於你的第一條自動化流程 — 報名表" />
   <style>
-    /* --------- Reset & 基本 --------- */
     :root{
       --accent:#0ea5a4;
       --dark:#0f1724;
@@ -42,11 +41,8 @@
       background:linear-gradient(135deg,#083047,#0a2130);
       display:flex;align-items:center;justify-content:center;
     }
-    .hero-img img{width:100%;height:100%;object-fit:cover}
     h1{font-size:20px;margin:0 0 4px 0}
     p.lead{margin:0;color:var(--muted);font-size:14px}
-
-    /* --------- 卡片樣式 --------- */
     .card{background:var(--card);padding:18px;border-radius:10px;margin-bottom:18px;border:1px solid rgba(255,255,255,0.03)}
     .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
     label{display:block;font-size:13px;color:#cfe8ec;margin-bottom:6px}
@@ -57,53 +53,63 @@
       background:transparent;color: #e6eef6;
       outline:none;font-size:14px;
     }
-    /* 修正下拉選單選項顏色 */
-    select {
-      background-color: #0b1220;
-      color: #e6eef6;
-    }
-    select option {
-      background-color: #0b1220;
-      color: #e6eef6;
-      padding: 8px;
-    }
-    select option:hover {
-      background-color: #0ea5a4;
-      color: #ffffff;
-    }
-    select:focus {
-      border-color: #0ea5a4;
-      box-shadow: 0 0 0 2px rgba(14, 165, 164, 0.1);
-    }
+    select {background-color: #0b1220;color: #e6eef6;}
+    select option {background-color: #0b1220;color: #e6eef6;padding: 8px;}
+    select:focus {border-color: #0ea5a4;box-shadow: 0 0 0 2px rgba(14, 165, 164, 0.1);}
     textarea{min-height:96px;resize:vertical;padding-top:10px}
     .small{font-size:13px;color:var(--muted);margin-top:6px}
-    .radio-row{display:flex;gap:12px;align-items:center}
+    .radio-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
     .radio{
-      display:flex;gap:8px;align-items:center;padding:8px 10px;border-radius:8px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));border:1px solid rgba(255,255,255,0.02)
+      display:flex;gap:8px;align-items:center;padding:8px 10px;border-radius:8px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));
+      border:1px solid rgba(255,255,255,0.02)
     }
     .muted{color:var(--muted);font-size:13px}
-
-    /* --------- CTA --------- */
     .actions{display:flex;gap:12px;align-items:center;justify-content:flex-end;margin-top:12px}
     button.primary{background:linear-gradient(90deg,var(--accent),#06b6d4);color:#052024;padding:12px 18px;border-radius:10px;border:none;font-weight:600;cursor:pointer;box-shadow:0 6px 18px rgba(13,148,136,0.18)}
     button.ghost{background:transparent;color:var(--muted);padding:10px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);cursor:pointer}
+    .note{background:rgba(14,165,164,0.06);padding:10px;border-radius:8px;color:#9fe8e2;font-size:13px;border:1px solid rgba(14,165,164,0.06)}
 
-    /* --------- 訊息 --------- */
-    .note{background:rgba(14,165,164,0.06);padding:10px;border-radius:8px;color:#9fe6e2;font-size:13px;border:1px solid rgba(14,165,164,0.06)}
+    /* 摺疊區塊 */
+    .accordion{border:1px solid rgba(255,255,255,0.06);border-radius:8px;overflow:hidden;margin-top:12px;}
+    .accordion-header{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:12px 14px;background:rgba(255,255,255,0.02);cursor:pointer;transition: background 0.2s;
+    }
+    .accordion-header:hover{background:rgba(255,255,255,0.04);}
+    .accordion-title{font-size:14px;color:#cfe8ec;display:flex;align-items:center;gap:8px;}
+    .accordion-icon{font-size:12px;color:var(--muted);transition: transform 0.3s;}
+    .accordion.open .accordion-icon{transform: rotate(180deg);}
+    .accordion-content{max-height:0;overflow:hidden;transition: max-height 0.3s ease-out;background:rgba(0,0,0,0.2);}
+    .accordion.open .accordion-content{max-height:500px;}
+    .accordion-inner{padding:14px;}
+    .bank-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:13px;}
+    .bank-row:last-child{border-bottom:none}
+    .bank-label{color:var(--muted)}
+    .bank-value{color:#e6eef6;font-weight:500}
+    .bank-value.highlight{color:#0ea5a4;font-weight:600}
 
-    /* --------- 小尺寸響應 --------- */
+    .optional-tag{background:rgba(107,114,128,0.2);color:var(--muted);font-size:11px;padding:2px 6px;border-radius:4px;margin-left:6px;}
+    .hint-box{
+      background:rgba(14,165,164,0.08);border:1px solid rgba(14,165,164,0.15);border-radius:8px;
+      padding:10px 12px;margin-top:12px;font-size:13px;color:#9fe8e2;display:flex;align-items:flex-start;gap:8px;
+    }
+    .hint-box .icon{font-size:16px}
+
     @media (max-width:800px){
       .grid{grid-template-columns:1fr}
       header{flex-direction:row;gap:12px}
       .hero-img{width:96px;height:64px}
       .actions{flex-direction:column;align-items:stretch}
+      .bank-row{flex-direction:column;align-items:flex-start;gap:4px}
+      .radio-row{flex-direction:column;align-items:stretch}
     }
   </style>
 </head>
 <body>
   <div class="container" role="main">
     <header>
-      <div class="hero-img" aria-hidden="true" style="background:linear-gradient(135deg,#0ea5a4,#06b6d4);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(14,165,164,0.4);">
+      <div class="hero-img" style="background:linear-gradient(135deg,#0ea5a4,#06b6d4);box-shadow:0 6px 20px rgba(14,165,164,0.4);">
         <div style="text-align:center;">
           <div style="font-size:28px;font-weight:700;color:#052024;letter-spacing:3px;line-height:1;">ZN</div>
           <div style="font-size:8px;color:#052024;margin-top:4px;letter-spacing:2px;font-weight:600;">STUDIO</div>
@@ -150,13 +156,11 @@
       <!-- 2. 報名資訊 -->
       <section class="card" aria-labelledby="sec-info">
         <h2 id="sec-info" style="margin:0 0 8px 0;font-size:15px">二、報名資訊</h2>
-
         <label for="course">欲報名課程 / 報名場次（必選）</label>
         <select id="course" name="course" required>
           <option value="">-- 選擇課程 --</option>
           <option value="n8n-intro-20251220">ZN Studio｜n8n 實作入門（2025/12/20）</option>
         </select>
-
         <div style="margin-top:12px">
           <label for="qty">報名人數</label>
           <select id="qty" name="qty" required>
@@ -174,7 +178,6 @@
       <!-- 3. 付款方式 -->
       <section class="card" aria-labelledby="sec-pay">
         <h2 id="sec-pay" style="margin:0 0 8px 0;font-size:15px">三、付款方式（必選）</h2>
-
         <div class="radio-row" role="radiogroup" aria-label="付款方式">
           <label class="radio">
             <input type="radio" name="payMethod" value="ecpay" checked /> <span class="muted">綠界金流（信用卡 / ATM / 超商）</span>
@@ -187,7 +190,6 @@
         <!-- 綠界付款說明 -->
         <div id="ecpayBox" style="margin-top:12px">
           <p class="small">選擇綠界金流後，表單送出會導向綠界結帳頁完成付款。</p>
-
           <div style="margin-top:8px" class="grid">
             <div>
               <label for="ecpayMethod">付款方式（綠界）</label>
@@ -202,18 +204,57 @@
 
         <!-- 匯款付款說明 -->
         <div id="bankBox" style="display:none;margin-top:12px">
-          <p class="small">請依下列帳戶資訊匯款，匯款完成後請填寫您的匯款帳號末五碼。</p>
-
-          <div class="note" id="bankInfo">
-            <strong>銀行名稱：</strong> 台灣銀行<br/>
-            <strong>戶名：</strong> ZN Studio<br/>
-            <strong>銀行帳號：</strong> 01234567890123
+          <!-- 摺疊式匯款資訊 -->
+          <div class="accordion" id="bankAccordion">
+            <div class="accordion-header" onclick="toggleAccordion()">
+              <span class="accordion-title">
+                <span>🏦</span>
+                <span>查看匯款帳號資訊</span>
+              </span>
+              <span class="accordion-icon">▼</span>
+            </div>
+            <div class="accordion-content">
+              <div class="accordion-inner">
+                <div class="bank-row">
+                  <span class="bank-label">銀行名稱</span>
+                  <span class="bank-value">國泰世華銀行（013）</span>
+                </div>
+                <div class="bank-row">
+                  <span class="bank-label">分行名稱</span>
+                  <span class="bank-value">中和分行</span>
+                </div>
+                <div class="bank-row">
+                  <span class="bank-label">戶名</span>
+                  <span class="bank-value">張家寧</span>
+                </div>
+                <div class="bank-row">
+                  <span class="bank-label">銀行帳號</span>
+                  <span class="bank-value">012345678901234</span>
+                </div>
+                <div class="bank-row">
+                  <span class="bank-label">匯款金額</span>
+                  <span class="bank-value highlight">NT$ 2,999</span>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div style="margin-top:10px">
-            <label for="bankLast5">您的匯款帳號末 5 碼（匯款完成後填寫）</label>
-            <input id="bankLast5" name="bankLast5" type="text" placeholder="例如：12345" maxlength="5" />
-            <div class="small">範例：如果您的帳號是 123-456-789012，請填寫 89012</div>
+          <!-- 後五碼欄位（選填）-->
+          <div style="margin-top:16px">
+            <label for="bankLast5">
+              匯款帳號末 5 碼
+              <span class="optional-tag">選填</span>
+            </label>
+            <input id="bankLast5" name="bankLast5" type="text" placeholder="已匯款者請填寫，例如：12345" maxlength="5" />
+            <div class="small">如果您的帳號是 123-456-789012，請填寫 89012</div>
+          </div>
+
+          <!-- 提示訊息 -->
+          <div class="hint-box">
+            <span class="icon">💡</span>
+            <div>
+              <strong>還沒匯款？</strong>沒關係！送出報名後會顯示完整匯款資訊，請於 <strong>三天內</strong> 完成匯款即可。
+            </div>
           </div>
         </div>
       </section>
@@ -221,19 +262,16 @@
       <!-- 4. 發票資訊 -->
       <section class="card" aria-labelledby="sec-invoice">
         <h2 id="sec-invoice" style="margin:0 0 8px 0;font-size:15px">四、發票資訊</h2>
-
         <div style="display:flex;gap:12px;align-items:center">
           <label><input type="radio" name="invType" value="two" checked /> 二聯式（個人）</label>
           <label><input type="radio" name="invType" value="three" /> 三聯式（公司）</label>
         </div>
-
         <div id="threeInvoice" style="display:none;margin-top:10px">
           <label for="vatTitle">公司抬頭</label>
           <input id="vatTitle" name="vatTitle" type="text" placeholder="公司抬頭" />
           <label for="vatNo" style="margin-top:8px">統一編號</label>
           <input id="vatNo" name="vatNo" type="text" placeholder="統編" />
         </div>
-
         <div style="margin-top:8px">
           <label for="invEmail">發票接收 Email（若為電子發票）</label>
           <input id="invEmail" name="invEmail" type="email" placeholder="receipt@example.com" />
@@ -251,7 +289,6 @@
         <button type="button" class="ghost" onclick="resetForm()">重設表單</button>
         <button type="submit" class="primary" id="submitBtn">提交報名</button>
       </div>
-
       <div style="margin-top:12px" class="small">提交後請留意 Email 或 Line，我們將於 1–2 個工作天內確認報名狀態。</div>
     </form>
 
@@ -261,9 +298,7 @@
   </div>
 
   <script>
-    // ===== n8n Webhook URL =====
     const N8N_WEBHOOK_URL = "https://nickleo9.zeabur.app/webhook/course-registration";
-
     const form = document.getElementById('signupForm');
     const payRadios = document.getElementsByName('payMethod');
     const bankBox = document.getElementById('bankBox');
@@ -274,58 +309,49 @@
     const invTypeRadios = document.getElementsByName('invType');
     const threeInvoice = document.getElementById('threeInvoice');
 
-    // ===== 付款方式切換 =====
+    // 摺疊功能
+    function toggleAccordion() {
+      document.getElementById('bankAccordion').classList.toggle('open');
+    }
+
+    // 付款方式切換
     function updatePayUI() {
       const v = Array.from(payRadios).find(r=>r.checked).value;
-      if (v === 'bank') {
-        bankBox.style.display = 'block';
-        ecpayBox.style.display = 'none';
-      } else {
-        bankBox.style.display = 'none';
-        ecpayBox.style.display = 'block';
-      }
+      bankBox.style.display = v === 'bank' ? 'block' : 'none';
+      ecpayBox.style.display = v === 'ecpay' ? 'block' : 'none';
     }
     Array.from(payRadios).forEach(r => r.addEventListener('change', updatePayUI));
     updatePayUI();
 
-    // ===== 人數選擇 =====
+    // 人數選擇
     qtySelect.addEventListener('change', () => {
-      if (qtySelect.value === 'other') {
-        otherQtyWrap.style.display = 'block';
-      } else {
-        otherQtyWrap.style.display = 'none';
-        document.getElementById('otherQty').value = '';
-      }
+      otherQtyWrap.style.display = qtySelect.value === 'other' ? 'block' : 'none';
+      if (qtySelect.value !== 'other') document.getElementById('otherQty').value = '';
     });
 
-    // ===== 發票類型切換 =====
+    // 發票類型切換
     Array.from(invTypeRadios).forEach(r => {
       r.addEventListener('change', () => {
-        if (r.value === 'three') {
-          threeInvoice.style.display = 'block';
-        } else {
-          threeInvoice.style.display = 'none';
-        }
+        threeInvoice.style.display = r.value === 'three' ? 'block' : 'none';
       });
     });
 
-    // ===== 重設表單 =====
+    // 重設表單
     function resetForm(){
       if (!confirm('確定要重設表單嗎？')) return;
       form.reset();
       updatePayUI();
       otherQtyWrap.style.display = 'none';
       threeInvoice.style.display = 'none';
+      document.getElementById('bankAccordion').classList.remove('open');
     }
 
-    // ===== 表單送出處理（改用 JSON 格式）=====
+    // 表單送出
     form.addEventListener('submit', async (ev) => {
       ev.preventDefault();
-      
       submitBtn.disabled = true;
       submitBtn.textContent = '正在處理...';
 
-      // === 驗證必填欄位 ===
       const name = document.getElementById('name').value.trim();
       const phone = document.getElementById('phone').value.trim();
       const email = document.getElementById('email').value.trim();
@@ -338,76 +364,54 @@
         return;
       }
 
-      // === 收集表單資料（JSON 格式）===
+      const bankLast5 = document.getElementById('bankLast5').value.trim();
+      const payMethod = document.querySelector('input[name="payMethod"]:checked').value;
+
       const formData = {
-        // 基本資料
-        name: name,
-        email: email,
-        phone: phone,
+        name, email, phone,
         line: document.getElementById('line').value.trim() || '',
         company: document.getElementById('company').value.trim() || '',
         title: document.getElementById('title').value.trim() || '',
-        
-        // 報名資訊
-        course: course,
+        course,
         qty: document.getElementById('qty').value,
         otherQty: document.getElementById('otherQty').value || '',
-        
-        // 付款方式
-        payMethod: document.querySelector('input[name="payMethod"]:checked').value,
-        
-        // 綠界金流
+        payMethod,
         ecpayMethod: document.getElementById('ecpayMethod').value || '',
-        
-        // 銀行匯款
-        bankLast5: document.getElementById('bankLast5').value || '',
-        
-        // 發票資訊
+        bankLast5,
         invType: document.querySelector('input[name="invType"]:checked').value,
         vatTitle: document.getElementById('vatTitle').value || '',
         vatNo: document.getElementById('vatNo').value || '',
         invEmail: document.getElementById('invEmail').value || '',
-        
-        // 備註
         remark: document.getElementById('remark').value.trim() || ''
       };
 
-      console.log('準備送出的資料:', formData);
-
-      // === 送到 n8n Webhook ===
       try {
         const response = await fetch(N8N_WEBHOOK_URL, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(formData)
         });
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const result = await response.json();
-        console.log('n8n 回應:', result);
 
-        // === 處理回應 ===
         if (result.success) {
-          // 如果是綠界付款，處理 ECPay 參數
-          if (formData.payMethod === 'ecpay' && result.ecpayParams) {
-            // 顯示提示
+          if (payMethod === 'ecpay' && result.ecpayParams) {
             alert(`✅ 報名成功！\n訂單編號：${result.orderId}\n\n即將導向綠界付款頁面...`);
-            
-            // 建立自動提交的表單
             createECPayForm(result.ecpayUrl, result.ecpayParams);
-        } else {
-            // 匯款的話，跳轉到匯款專屬頁面
-            window.location.href = `https://nickleo051216.github.io/n8ncourse/bank-success.html?order=${result.orderId}&name=${encodeURIComponent(name)}`;
-        }
+          } else {
+            // 銀行匯款：根據有沒有填後五碼決定跳轉
+            if (bankLast5 && bankLast5.length === 5) {
+              // 有填後五碼 → 已匯款，跳到成功頁（待確認款項）
+              window.location.href = `https://nickleo051216.github.io/n8ncourse/course-success.html?order=${result.orderId}&name=${encodeURIComponent(name)}&status=pending`;
+            } else {
+              // 沒填後五碼 → 尚未匯款，跳到匯款專屬頁
+              window.location.href = `https://nickleo051216.github.io/n8ncourse/bank-success.html?order=${result.orderId}&name=${encodeURIComponent(name)}`;
+            }
+          }
         } else {
           alert('❌ 報名失敗：' + (result.error || '未知錯誤'));
         }
-
       } catch (error) {
         console.error('報名錯誤:', error);
         alert('❌ 送出失敗，請稍後再試或聯絡主辦方。\n\n錯誤訊息：' + error.message + '\n\n聯絡方式：\nEmail: nickleo051216@gmail.com\nLine: https://lin.ee/Faz0doj');
@@ -417,27 +421,18 @@
       }
     });
 
-    // ===== 建立並自動提交 ECPay 表單 =====
     function createECPayForm(url, params) {
-      // 建立表單元素
-      const form = document.createElement('form');
-      form.method = 'POST';
-      form.action = url;
-      form.style.display = 'none';
-      
-      // 加入所有參數
+      const ecForm = document.createElement('form');
+      ecForm.method = 'POST';
+      ecForm.action = url;
+      ecForm.style.display = 'none';
       for (const key in params) {
         const input = document.createElement('input');
         input.type = 'hidden';
         input.name = key;
         input.value = params[key];
-        form.appendChild(input);
+        ecForm.appendChild(input);
       }
-      
-      // 加到頁面並自動送出
-      document.body.appendChild(form);
-      
-      // 顯示 loading 畫面（保留 ZN STUDIO logo）
       document.body.innerHTML = `
         <div style="display:flex;align-items:center;justify-content:center;height:100vh;background:linear-gradient(180deg,#041227 0%, #071026 60%);color:#e6eef6;font-family:'Noto Sans TC',sans-serif;">
           <div style="text-align:center;">
@@ -452,21 +447,11 @@
             <p style="font-size:14px;color:#6b7280;margin:0;">請稍候，不要關閉此頁面</p>
           </div>
         </div>
-        <style>
-          @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-          }
-        </style>
+        <style>@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}</style>
       `;
-      document.body.appendChild(form);
-      
-      // 延遲一點再送出，讓用戶看到 loading
-      setTimeout(() => {
-        form.submit();
-      }, 500);
+      document.body.appendChild(ecForm);
+      setTimeout(() => ecForm.submit(), 500);
     }
   </script>
 </body>
 </html>
-
